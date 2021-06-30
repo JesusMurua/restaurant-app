@@ -1,0 +1,88 @@
+<mat-drawer-container class="menu-container">
+  <router-outlet></router-outlet>
+
+  <mat-drawer mode="side" class="left" opened>
+    <div class="column" *ngFor="let categoria of categorias;">
+      <div class="card" [ngClass]="categoriaSeleccionada === categoria ? 'categoria-checked' : ''">
+        <a (click)="selectCategoria(categoria)">
+          <img src="../../../../assets/images/Food-PNG-File.png">
+        </a>
+        <h3>{{ categoria.categoria | uppercase }}</h3>
+      </div>
+    </div>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <div class="categoria-selected">
+      <h3 *ngIf="categoriaSeleccionada" class="categoria-menu">{{ categoriaSeleccionada.categoria | uppercase }}</h3>
+    </div>
+
+
+    <app-platillos *ngIf="categoriaSeleccionada"
+      [Categoria]="categoriaSeleccionada">
+    </app-platillos>
+  </mat-drawer-content>
+
+  <mat-drawer mode="side" class="right" opened  position="end">
+    <div class="orden">
+      <h3 class="orden-number"> ORDEN </h3>
+    </div>
+    <hr width="100%">
+
+    <div class="checkout">
+      <div *ngIf="(meals$ | async ) as meals">
+        <div class="row" *ngFor="let item of meals">
+          <div class="col-xs-12 col-sm-5 col-md-5">
+            <figure class="post-image">
+              <img src="../../../../assets/images/Food-Free-PNG-Image.png" alt="" class="b-loaded">
+            </figure>
+
+            <div class="box">
+              <h3 class="platillo">{{ item.platillo.platillo | uppercase }}</h3>
+              <h3 class="precio"> {{ item.Total | currency }}</h3>
+            </div>
+
+            <div class="wrapper">
+              <button class="plusminus" (click)="handleMinus(item)" [disabled]='item.Cantidad == 1'>-</button>
+              <!-- <input type="number" class="num"  value="item.cantidad" /> -->
+              <input matInput type="text" class="num" value="{{item.Cantidad}}" [(ngModel)]="item.Cantidad" (change)="updateTotal($event)">
+              <button class="plusminus" (click)="handlePlus(item)">+</button>
+            </div>
+
+
+          </div>
+
+          <hr width="70%">
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mat-elevation-z8 footer">
+      <div id="container-demo">
+        <div id="left"></div>
+        <div id="mid"></div>
+        <div id="right"></div>
+      </div>
+
+      <!-- <div class="order-total">
+        <span class="total-text">Total: </span>
+        <span class="total-cantidad">$ 500.00</span>
+      </div> -->
+
+      <!-- <div class="title">
+        <span class="name">Cumulative performance</span>
+        <span class="date">20/02/2011</span>
+      </div> -->
+
+      <br>
+
+      <div>
+        <button mat-flat-button color="primary" class="max-button">Pagar</button>
+      </div>
+    </div>
+
+  </mat-drawer>
+</mat-drawer-container>
+
+

@@ -1,0 +1,17 @@
+
+
+<div class="card">
+  <a [routerLink]="['add-meal/', Platillo.id]" class="item-platillo" >
+    <figure class="post-image">
+      <img src="../../../../assets/images/Food-Free-PNG-Image.png" alt="" class="b-loaded">
+    </figure>
+    <h3 class="platillo">{{ Platillo.platillo | uppercase }}</h3>
+    <h3 class="precio"> {{ Platillo.precio  | currency }}</h3>
+  </a>
+</div>
+
+
+
+
+
+

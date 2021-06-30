@@ -1,0 +1,118 @@
+<mat-drawer-container class="menu-container">
+  <router-outlet></router-outlet>
+
+  <mat-drawer mode="side" class="left" opened>
+    <div fxLayout="row" class="food-image">
+      <figure>
+          <img src="../../../../assets/images/Food-Free-Download-PNG.png">
+      </figure>
+    </div>
+
+    <div fxLayout="row">
+      <div fxFlex="100%" *ngIf="platillo.platillo">
+        <h3 class="food-title" fxFlex="70%"> {{ platillo.platillo.platillo | uppercase}} </h3>
+        <h3 class="food-price" fxFlex="30%"> {{ platillo.platillo.precio | currency}} </h3>
+      </div>
+    </div>
+
+    <div fxLayout="row">
+      <p class="food-description">
+        {{ platillo.platillo.description | uppercase}}
+      </p>
+    </div>
+
+    <div fxLayout="row">
+      <div fxFlex="50%">
+        <div fxLayout="row" class="food-quantity">
+          <h3 class="food-quantity-text">CANT: </h3>
+          <ejs-numerictextbox width="100%"   min="1"
+            cssClass='food-quantity-number'
+            style="text-align: center;"
+            [(ngModel)]="platillo.Cantidad"
+            (change)="updateTotal($event)" cr ></ejs-numerictextbox>
+        </div>
+      </div>
+
+      <div fxFlex="50%">
+        <div fxLayout="row" class="food-quantity">
+          <h3 class="food-quantity-text">Total:</h3>
+          <h3 class="food-quantity-number"> {{ platillo.Total | currency}} </h3>
+        </div>
+      </div>
+    </div>
+
+    <div fxLayout="row" fxLayoutGap="10px">
+      <div fxFlex="50%" class="food-checkout">
+        <button mat-flat-button color="primary" class="food-checkout-button" (click)="addCart()">Agregar</button>
+      </div>
+
+      <div fxFlex="50%" class="food-checkout-cancelar">
+        <button mat-stroked-button color="accent" class="food-checkout-button" (click)="cancelar()">Regresar</button>
+      </div>
+
+
+
+    </div>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <div class="grid-container">
+      <div class="size food-options">
+        <div fxLayout="row">
+          <div fxFlex="30%">
+            <h1>SELECCIONAR TAMAÑO</h1>
+          </div>
+
+          <div fxFlex="70%">
+            <hr>
+          </div>
+        </div>
+
+        <div fxLayout="row">
+          <div fxFlex="100%" class="food-size-options">
+            <mat-radio-group
+              fxLayout="row"
+              fxLayoutAlign="space-bewteen start" fxLayoutGap="50px"
+              [(ngModel)]="sizeSelected">
+                <div *ngFor="let size of sizes;" class="check-size" >
+                  <mat-radio-button disableRipple="true"  class="option-size"
+                    [ngClass]="sizeSelected === size ? 'option-checked' : ''" [value]="size" (change)="onChangeSize($event)">
+                    <!-- (change)="clickItem(size, sizeSelected)" -->
+                    <h2 class="text-center">{{ size.size | uppercase}}</h2>
+                    <h3 class="text-center">+ {{ size.precio | currency}}</h3>
+                  </mat-radio-button>
+                </div>
+            </mat-radio-group>
+          </div>
+        </div>
+      </div>
+
+      <div class="extras food-options">
+        <div fxLayout="row">
+          <div fxFlex="30%">
+            <h1>SELECCIONAR EXTRAS</h1>
+          </div>
+
+          <div fxFlex="70%">
+            <hr>
+          </div>
+        </div>
+
+        <div fxLayout="row">
+          <div fxFlex="100%" class="food-extras-options">
+            <div  fxLayout="row" fxLayoutAlign="space-bewteen start" fxLayoutGap="50px">
+              <div *ngFor="let extra of extras" class="check-size" [ngClass]="checkExtraSelected(extra) ? 'option-checked' : ''">
+                <mat-checkbox [disableRipple]="true" class="option-size"
+                 (change)="onChangeAddon(extra, $event)">
+                  <h2>{{ extra.extra | uppercase }}</h2>
+                  <h3>+ {{ extra.precio | currency }}</h3>
+                </mat-checkbox>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-drawer-content>
+
+</mat-drawer-container>

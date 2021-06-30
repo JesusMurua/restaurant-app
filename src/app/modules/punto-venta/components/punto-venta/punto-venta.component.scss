@@ -1,0 +1,198 @@
+
+
+/* MENU  CONTAINER*/
+.menu-container {
+  width: 100vw;
+  height: 100vh;
+  // margin: 10px;
+  border: 1px solid #555;
+}
+
+.left {
+  width: 15%;
+}
+
+.right {
+  // height: 0%;
+  width: 15%;
+  background-color: #eeeeee;
+}
+
+/* CATEGORIAS */
+.column {
+  // float: left;
+  // width: 90%;
+  // padding: 10px 10px;
+  width: 80%;
+  padding: 50px 10px 10px 20px;
+}
+
+.card {
+  // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  // padding: 30px;
+  text-align: center;
+
+  // background-color: #f1f1f1;
+}
+
+.card h3 {
+  font-size:  1.2em;
+  font-weight: 400;
+  letter-spacing: 2px;
+}
+
+.card:hover{
+  // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  border: 1.9px solid #D3D3D3;
+  color: orangered;
+}
+
+.categoria-checked {
+  border: 1.9px solid #D3D3D3;
+  color: orangered;
+}
+
+
+
+img{
+  max-width: 100%;
+  max-height: 100%;
+  display: block; /* remove extra space below image */
+}
+
+/* MENU */
+.categoria-selected{
+  padding: 40px 50px;
+}
+
+.categoria-menu{
+  color: #555;
+  font-size: 1.5em;
+  letter-spacing: 2px;
+}
+
+
+
+/* CHECKOUT */
+.checkout{
+  height: 80%;
+  // overflow: auto;
+}
+
+.orden{
+  padding: 20px 50px;
+}
+
+.box {
+  width: 250px;
+  padding: 0px 15px;
+  // border: 5px solid black;
+}
+
+.platillo{
+  // font-size:  large;
+  font-weight: 400;
+  color: black;
+  padding: 0px;
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+
+
+.precio {
+  // font-size:  large;
+  font-weight: 400;
+  color: black;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+
+
+.orden-number{
+  color: #555;
+  font-size: 1.5em;
+  letter-spacing: 2px;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+.max-button{
+  display: block;
+  width: 15%;
+  // border: none;
+  // background-color: #4CAF50;
+  // color: white;
+  padding: 14px 28px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.order-total{
+  display: block;
+}
+
+.total-text{
+  float: left;
+  width:33.33333%;
+  text-align:left;
+}
+
+.total-cantidad{
+  float: left;
+  width:33.33333%;
+  text-align:right;
+}
+
+/*
+  INPUT CANTIDAD
+*/
+input {
+  text-align: center;
+  border: 1px solid #6C757D;
+}
+
+input[type="number"] {
+  -webkit-appearance: textfield !important;
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+  }
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+
+.wrapper {
+  border: 1px #dcd3d3 solid;
+  width: 90%;
+  height: 50px;
+  padding: 5px;
+  margin: 8px;
+  display: flex;
+  border-radius: 15px;
+}
+
+.plusminus {
+  height: 95%;
+  width: 30%;
+  // background: white;
+  border: none;
+  font-size: 40px;
+  color: #5f5fce;
+
+}
+
+.num {
+  height: 91%;
+  width: 39%;
+  border: none;
+  font-size: 30px;
+  margin-top: 0.1px;
+  background: transparent;
+}
