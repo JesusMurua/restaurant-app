@@ -1,0 +1,26 @@
+<button
+  class="product-card"
+  type="button"
+  [attr.aria-label]="'Agregar ' + product.name"
+  (click)="selected.emit(product)"
+>
+  <!-- Popular badge -->
+  @if (product.isPopular) {
+    <span class="product-card__badge">Popular</span>
+  }
+
+  <!-- Icon box (image or fallback icon) -->
+  <div class="product-card__icon-box">
+    @if (product.imageUrl) {
+      <img [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
+    } @else {
+      <i class="pi pi-shopping-bag"></i>
+    }
+  </div>
+
+  <!-- Info -->
+  <div class="product-card__info">
+    <span class="product-card__name">{{ product.name }}</span>
+    <span class="product-card__price">{{ product.priceCents | price }}</span>
+  </div>
+</button>

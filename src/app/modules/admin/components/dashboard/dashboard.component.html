@@ -1,0 +1,129 @@
+<div class="dashboard">
+
+  <h1 class="dashboard__title">Dashboard — Hoy</h1>
+
+  @if (isLoading()) {
+    <div class="dashboard__loading">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>Cargando datos...</span>
+    </div>
+  }
+
+  @if (!isLoading() && data(); as d) {
+
+    <!-- KPI Cards -->
+    <section class="kpi-grid">
+
+      <div class="kpi-card">
+        <span class="kpi-card__label">Total del día</span>
+        <span class="kpi-card__value kpi-card__value--primary">{{ d.totalCents | price }}</span>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-card__label">Órdenes</span>
+        <span class="kpi-card__value">{{ d.orderCount }}</span>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-card__label">Ticket promedio</span>
+        <span class="kpi-card__value">{{ d.averageTicketCents | price }}</span>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-card__label">Método más usado</span>
+        <span class="kpi-card__value">
+          @if (d.topMethod === 'cash') {
+            <span class="badge badge--cash">Efectivo</span>
+          } @else if (d.topMethod === 'card') {
+            <span class="badge badge--card">Tarjeta</span>
+          } @else {
+            <span class="kpi-card__empty">—</span>
+          }
+        </span>
+      </div>
+
+    </section>
+
+    <!-- Corte de caja -->
+    <section class="section-card">
+      <h2 class="section-card__title">Corte de caja</h2>
+      <div class="cutoff-grid">
+        <div class="cutoff-row">
+          <span class="badge badge--cash">Efectivo</span>
+          <span class="cutoff-row__amount">{{ d.cashCents | price }}</span>
+        </div>
+        <div class="cutoff-row">
+          <span class="badge badge--card">Tarjeta</span>
+          <span class="cutoff-row__amount">{{ d.cardCents | price }}</span>
+        </div>
+        <div class="cutoff-row cutoff-row--total">
+          <span class="cutoff-row__label">Total</span>
+          <span class="cutoff-row__amount cutoff-row__amount--total">{{ d.totalCents | price }}</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="dashboard__columns">
+
+      <!-- Top 5 productos -->
+      <section class="section-card">
+        <h2 class="section-card__title">Top 5 productos del día</h2>
+        @if (d.topProducts.length === 0) {
+          <p class="section-card__empty">Sin ventas hoy.</p>
+        } @else {
+          <ol class="top-list">
+            @for (item of d.topProducts; track item.name; let rank = $index) {
+              <li class="top-item" [class.top-item--first]="rank === 0">
+                <span class="top-item__rank">{{ rank + 1 }}</span>
+                <span class="top-item__name">{{ item.name }}</span>
+                <span class="top-item__count">{{ item.count }} pza</span>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+
+      <!-- Órdenes del día -->
+      <section class="section-card section-card--wide">
+        <h2 class="section-card__title">Órdenes del día</h2>
+        @if (d.orders.length === 0) {
+          <p class="section-card__empty">No hay órdenes hoy.</p>
+        } @else {
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Productos</th>
+                  <th>Método</th>
+                  <th>Hora</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of d.orders; track order.id) {
+                  <tr>
+                    <td class="orders-table__num">#{{ order.orderNumber }}</td>
+                    <td class="orders-table__items">{{ order.items.length }} artículo(s)</td>
+                    <td>
+                      @if (order.paymentMethod === 'cash') {
+                        <span class="badge badge--cash">Efectivo</span>
+                      } @else {
+                        <span class="badge badge--card">Tarjeta</span>
+                      }
+                    </td>
+                    <td class="orders-table__time">{{ formatTime(order.createdAt) }}</td>
+                    <td class="orders-table__total">{{ order.totalCents | price }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+    </div>
+
+  }
+
+</div>

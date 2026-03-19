@@ -1,0 +1,119 @@
+@use '../../../styles/variables' as *;
+
+.admin-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: $color-bg-page;
+}
+
+// -----------------------------------------------------------------------
+// Header
+// -----------------------------------------------------------------------
+.admin-header {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  height: 60px;
+  padding: 0 $space-5;
+  background: white;
+  border-bottom: 1px solid $color-border-soft;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    min-width: 140px;
+  }
+
+  &__logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i { color: white; font-size: 15px; }
+  }
+
+  &__title {
+    font-size: 15px;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    margin-left: auto;
+    padding: $space-2 $space-3;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: $color-text-sub;
+    font-size: $font-size-label;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+
+    i { font-size: 12px; }
+
+    &:hover { background: #F3F4F6; }
+    &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+  }
+}
+
+// -----------------------------------------------------------------------
+// Navigation tabs
+// -----------------------------------------------------------------------
+.admin-nav {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  flex: 1;
+  justify-content: center;
+
+  &__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-4;
+    border-radius: 8px;
+    color: $color-text-sub;
+    font-size: $font-size-label;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+
+    i { font-size: 14px; }
+
+    &:hover { background: #F3F4F6; color: $color-text-title; }
+    &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+
+    &--active {
+      background: $color-primary-light;
+      color: $color-primary;
+      font-weight: 700;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------
+// Page content
+// -----------------------------------------------------------------------
+.admin-content {
+  flex: 1;
+  padding: $space-5;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}

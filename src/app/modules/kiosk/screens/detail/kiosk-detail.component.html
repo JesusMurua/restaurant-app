@@ -1,0 +1,109 @@
+@if (product(); as p) {
+  <div class="kiosk-detail">
+
+    <!-- Header with back button -->
+    <header class="kiosk-detail__header">
+      <button
+        type="button"
+        class="kiosk-detail__back"
+        aria-label="Regresar al catálogo"
+        (click)="goBack()"
+      >
+        <i class="pi pi-arrow-left"></i>
+      </button>
+      <div class="kiosk-detail__info">
+        <h1 class="kiosk-detail__name">{{ p.name }}</h1>
+        <span class="kiosk-detail__base-price">Precio base: {{ p.priceCents | price }}</span>
+      </div>
+    </header>
+
+    <div class="kiosk-detail__divider"></div>
+
+    <!-- Form — scrollable body -->
+    <form [formGroup]="form" class="kiosk-detail__form">
+
+      <!-- Size selection -->
+      @if (p.sizes.length > 0) {
+        <section class="kiosk-detail__section">
+          <h2 class="kiosk-detail__section-title">Tamaño</h2>
+          <div class="kiosk-sizes">
+            @for (size of p.sizes; track size.id) {
+              <label class="kiosk-size-option" [for]="'ksize-' + size.id">
+                <p-radioButton
+                  formControlName="sizeId"
+                  [value]="size.id"
+                  [inputId]="'ksize-' + size.id"
+                />
+                <span class="kiosk-size-option__label">{{ size.label }}</span>
+                @if (size.priceDeltaCents > 0) {
+                  <span class="kiosk-size-option__delta">+ {{ size.priceDeltaCents | price }}</span>
+                }
+              </label>
+            }
+          </div>
+        </section>
+        <div class="kiosk-detail__divider"></div>
+      }
+
+      <!-- Extras selection -->
+      @if (p.extras.length > 0) {
+        <section class="kiosk-detail__section">
+          <h2 class="kiosk-detail__section-title">Extras</h2>
+          <div class="kiosk-extras" formArrayName="extras">
+            @for (extra of p.extras; track extra.id; let i = $index) {
+              <label class="kiosk-extra-option" [for]="'kextra-' + extra.id">
+                <p-checkbox
+                  [formControlName]="i"
+                  [binary]="true"
+                  [inputId]="'kextra-' + extra.id"
+                />
+                <span class="kiosk-extra-option__label">{{ extra.label }}</span>
+                @if (extra.priceCents > 0) {
+                  <span class="kiosk-extra-option__price">+ {{ extra.priceCents | price }}</span>
+                } @else {
+                  <span class="kiosk-extra-option__price kiosk-extra-option__price--free">Gratis</span>
+                }
+              </label>
+            }
+          </div>
+        </section>
+        <div class="kiosk-detail__divider"></div>
+      }
+
+      <!-- Notes -->
+      <section class="kiosk-detail__section">
+        <h2 class="kiosk-detail__section-title">
+          Notas para cocina
+          <span class="kiosk-detail__optional">(opcional)</span>
+        </h2>
+        <textarea
+          formControlName="notes"
+          pInputTextarea
+          [autoResize]="true"
+          placeholder="Sin cebolla, extra picante…"
+          class="kiosk-detail__notes"
+          id="kiosk-notes"
+          rows="2"
+        ></textarea>
+      </section>
+
+    </form>
+
+    <!-- Sticky footer -->
+    <footer class="kiosk-detail__footer">
+      <div class="kiosk-detail__preview">
+        <span class="kiosk-detail__total-label">Total:</span>
+        <span class="kiosk-detail__total">{{ previewPriceCents() | price }}</span>
+      </div>
+      <button
+        type="button"
+        class="kiosk-detail__add-btn"
+        (click)="onAddToCart()"
+      >
+        <i class="pi pi-plus"></i>
+        Agregar a la orden
+      </button>
+    </footer>
+
+  </div>
+}

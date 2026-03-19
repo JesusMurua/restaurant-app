@@ -1,0 +1,50 @@
+<div class="admin-shell">
+
+  <!-- Top navigation header -->
+  <header class="admin-header">
+    <div class="admin-header__brand">
+      <div class="admin-header__logo" aria-hidden="true">
+        <i class="pi pi-home"></i>
+      </div>
+      <span class="admin-header__title">Back Office</span>
+    </div>
+
+    <nav class="admin-nav" aria-label="Navegación del back office">
+      <a
+        class="admin-nav__tab"
+        routerLink="dashboard"
+        routerLinkActive="admin-nav__tab--active"
+      >
+        <i class="pi pi-chart-bar"></i>
+        <span>Dashboard</span>
+      </a>
+      <a
+        class="admin-nav__tab"
+        routerLink="products"
+        routerLinkActive="admin-nav__tab--active"
+      >
+        <i class="pi pi-list"></i>
+        <span>Catálogo</span>
+      </a>
+      <a
+        class="admin-nav__tab"
+        routerLink="settings"
+        routerLinkActive="admin-nav__tab--active"
+      >
+        <i class="pi pi-cog"></i>
+        <span>Configuración</span>
+      </a>
+    </nav>
+
+    <button type="button" class="admin-header__back" (click)="logout()" aria-label="Volver al POS">
+      <i class="pi pi-arrow-left"></i>
+      <span>Volver al POS</span>
+    </button>
+  </header>
+
+  <!-- Page content -->
+  <main class="admin-content">
+    <router-outlet />
+  </main>
+
+</div>

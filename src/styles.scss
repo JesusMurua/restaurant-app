@@ -1,78 +1,159 @@
-/* You can add global styles to this file, and also import other style files */
-@import '../node_modules/@syncfusion/ej2-base/styles/material.css';
-@import '../node_modules/@syncfusion/ej2-buttons/styles/material.css';
-@import '../node_modules/@syncfusion/ej2-inputs/styles/material.css';
-@import '../node_modules/@syncfusion/ej2-popups/styles/material.css';
-@import '../node_modules/@syncfusion/ej2-splitbuttons/styles/material.css';
-@import '../node_modules/@syncfusion/ej2-angular-inputs/styles/material.css';
+// =============================================================================
+// Global Styles — POS Táctil
+// =============================================================================
+// PrimeNG theme, PrimeFlex and PrimeIcons are loaded via angular.json.
+// Only project-specific globals belong here.
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+@use 'styles/variables' as *;
+@use 'styles/touch';
 
-/*
-  SCROLL BAR
-*/
+// -----------------------------------------------------------------------------
+// PrimeNG theme override — replace lara-light-indigo violet with brand green
+// -----------------------------------------------------------------------------
+:root {
+  --primary-color:       #16A34A;
+  --primary-color-text:  #ffffff;
+  --primary-50:          #F0FDF4;
+  --primary-100:         #DCFCE7;
+  --primary-200:         #BBF7D0;
+  --primary-300:         #86EFAC;
+  --primary-400:         #4ADE80;
+  --primary-500:         #22C55E;
+  --primary-600:         #16A34A;
+  --primary-700:         #15803D;
+  --primary-800:         #166534;
+  --primary-900:         #14532D;
+}
 
-// body::-webkit-scrollbar {
-//   width: 12px;               /* width of the entire scrollbar */
-// }
+// -----------------------------------------------------------------------------
+// Base
+// -----------------------------------------------------------------------------
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: $font-size-base;
+  background-color: var(--surface-ground);
+  color: var(--text-color);
+}
 
-// body::-webkit-scrollbar-track {
-//   background: orange;        /* color of the tracking area */
-// }
-
-// body::-webkit-scrollbar-thumb {
-//   background-color: blue;    /* color of the scroll thumb */
-//   border-radius: 20px;       /* roundness of the scroll thumb */
-//   border: 3px solid orange;  /* creates padding around scroll thumb */
-// }
-
-
-
+// -----------------------------------------------------------------------------
+// Scrollbar (desktop)
+// -----------------------------------------------------------------------------
 *::-webkit-scrollbar {
-  width: 10px;     /* Tamaño del scroll en vertical */
-  height: 10px;    /* Tamaño del scroll en horizontal */
-  //display: none;  /* Ocultar scroll */
+  width: 8px;
+  height: 8px;
 }
 
-// *::-webkit-scrollbar-track {
-//   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-// }
-
-/* Ponemos un color de fondo y redondeamos las esquinas del thumb */
 *::-webkit-scrollbar-thumb {
-  background:#707070;
+  background: #707070;
   border-radius: 4px;
+
+  &:hover {
+    background: #b3b3b3;
+  }
 }
 
-/* Cambiamos el fondo y agregamos una sombra cuando esté en hover */
-*::-webkit-scrollbar-thumb:hover {
-  background: #b3b3b3;
-  box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
-}
-
-// /* Cambiamos el fondo cuando esté en active */
-*::-webkit-scrollbar-thumb:active {
-  background-color: #999999;
-}
-
-/* Ponemos un color de fondo y redondeamos las esquinas del track */
 *::-webkit-scrollbar-track {
   background: #e1e1e1;
   border-radius: 4px;
 }
 
-/* Cambiamos el fondo cuando esté en active o hover */
-*::-webkit-scrollbar-track:hover,
-*::-webkit-scrollbar-track:active {
-  background: #d4d4d4;
+// -----------------------------------------------------------------------------
+// PrimeNG component color overrides
+// (lara-light-indigo hardcodes #6366F1; these rules replace it with brand green)
+// Loaded last via angular.json so specificity wins without !important where possible
+// -----------------------------------------------------------------------------
+
+// Buttons — primary (default severity)
+.p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-link):not(.p-button-secondary):not(.p-button-success):not(.p-button-info):not(.p-button-warning):not(.p-button-help):not(.p-button-danger) {
+  background: #16A34A;
+  border-color: #16A34A;
+
+  &:not(:disabled):hover {
+    background: #15803D;
+    border-color: #15803D;
+  }
+
+  &:not(:disabled):active {
+    background: #166534;
+    border-color: #166534;
+  }
 }
 
+// Focus ring on primary buttons
+.p-button:focus {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(22, 163, 74, 0.4), 0 0 0 8px transparent;
+}
 
+// Text / outlined buttons — primary color for icon and label
+// Excludes severity variants so danger/secondary keep their own color
+.p-button.p-button-text,
+.p-button.p-button-outlined {
+  &:not(.p-button-secondary):not(.p-button-success):not(.p-button-info):not(.p-button-warning):not(.p-button-help):not(.p-button-danger) {
+    color: #16A34A;
 
+    &:not(:disabled):hover {
+      background: rgba(22, 163, 74, 0.04);
+      color: #16A34A;
+    }
 
+    &:not(:disabled):active {
+      background: rgba(22, 163, 74, 0.16);
+      color: #16A34A;
+    }
+  }
+}
 
+// RadioButton — selected state
+.p-radiobutton .p-radiobutton-box.p-highlight {
+  border-color: #16A34A;
+  background: #16A34A;
 
+  &:hover {
+    border-color: #15803D;
+    background: #15803D;
+  }
+}
 
+.p-radiobutton .p-radiobutton-box:not(.p-disabled).p-focus {
+  box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.2);
+  border-color: #16A34A;
+}
 
+// Checkbox — selected state
+.p-checkbox .p-checkbox-box.p-highlight {
+  border-color: #16A34A;
+  background: #16A34A;
 
+  &:hover {
+    border-color: #15803D;
+    background: #15803D;
+  }
+}
+
+.p-checkbox .p-checkbox-box:not(.p-disabled).p-focus {
+  box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.2);
+  border-color: #16A34A;
+}
+
+// InputText / Textarea — focus border
+.p-inputtext:enabled:focus,
+textarea.p-inputtextarea:enabled:focus {
+  border-color: #16A34A;
+  box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.2);
+}
+
+// -----------------------------------------------------------------------------
+// Price display utility
+// -----------------------------------------------------------------------------
+.pos-price {
+  font-size: $font-size-price;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+}
+
+.pos-price--total {
+  color: $color-price-total;
+}

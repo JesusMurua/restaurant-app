@@ -1,0 +1,414 @@
+<div class="admin-products">
+
+  <!-- Header -->
+  <div class="admin-products__header">
+    <h1 class="admin-products__title">Catálogo de productos</h1>
+    <button
+      type="button"
+      class="btn-ghost"
+      [disabled]="true"
+      pTooltip="Disponible cuando se conecte el servidor"
+      tooltipPosition="left"
+    >
+      <i class="pi pi-upload"></i>
+      Importar Excel
+    </button>
+  </div>
+
+  <!-- Tabs: Productos / Categorías -->
+  <p-tabView styleClass="catalog-tabs">
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 1 — Productos                                                   -->
+    <!-- ------------------------------------------------------------------ -->
+    <p-tabPanel header="Productos">
+
+      <div class="tab-toolbar">
+        <span class="p-input-icon-left search-wrap">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            pInputText
+            placeholder="Buscar producto..."
+            (input)="dtProducts.filterGlobal($any($event.target).value, 'contains')"
+            class="search-input"
+          />
+        </span>
+        <button type="button" class="btn-primary" (click)="openCreate()">
+          <i class="pi pi-plus"></i>
+          Agregar producto
+        </button>
+      </div>
+
+      <div class="products-table-wrap">
+        <p-table
+          #dtProducts
+          [value]="products()"
+          [loading]="isLoading()"
+          [paginator]="true"
+          [rows]="10"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="{first}–{last} de {totalRecords} productos"
+          [globalFilterFields]="['name']"
+          [rowHover]="true"
+          dataKey="id"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name" style="min-width: 14rem">
+                Nombre <p-sortIcon field="name" />
+              </th>
+              <th pSortableColumn="categoryId" style="min-width: 10rem">
+                Categoría <p-sortIcon field="categoryId" />
+              </th>
+              <th pSortableColumn="priceCents" style="min-width: 8rem">
+                Precio <p-sortIcon field="priceCents" />
+              </th>
+              <th style="min-width: 6rem">Activo</th>
+              <th style="min-width: 5rem">Acciones</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-product>
+            <tr>
+              <td class="products-table__name">{{ product.name }}</td>
+              <td class="products-table__category">{{ categoryName(product.categoryId) }}</td>
+              <td class="products-table__price">{{ product.priceCents | price }}</td>
+              <td>
+                <p-inputSwitch
+                  [ngModel]="product.isAvailable"
+                  (onChange)="toggleActive(product)"
+                />
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-icon"
+                  aria-label="Editar producto"
+                  (click)="openEdit(product)"
+                >
+                  <i class="pi pi-pencil"></i>
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5" class="products-table__empty">No hay productos registrados.</td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+      </div>
+
+    </p-tabPanel>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 2 — Categorías                                                  -->
+    <!-- ------------------------------------------------------------------ -->
+    <p-tabPanel header="Categorías">
+
+      <div class="tab-toolbar">
+        <button type="button" class="btn-primary" (click)="openCreateCategory()">
+          <i class="pi pi-plus"></i>
+          Nueva categoría
+        </button>
+      </div>
+
+      @if (catError()) {
+        <p class="cat-error">
+          <i class="pi pi-exclamation-circle"></i>
+          {{ catError() }}
+        </p>
+      }
+
+      <div class="products-table-wrap">
+        <p-table
+          [value]="categories()"
+          [rowHover]="true"
+          dataKey="id"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="name" style="min-width: 14rem">
+                Nombre <p-sortIcon field="name" />
+              </th>
+              <th style="min-width: 6rem">Ícono</th>
+              <th style="min-width: 6rem">Activa</th>
+              <th style="min-width: 7rem">Acciones</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-cat>
+            <tr>
+              <td class="products-table__name">{{ cat.name }}</td>
+              <td>
+                <i [class]="'pi ' + (cat.icon || 'pi-tag')" class="cat-icon"></i>
+              </td>
+              <td>
+                <p-inputSwitch
+                  [ngModel]="cat.isActive"
+                  (onChange)="toggleCategoryActive(cat)"
+                />
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-icon"
+                  aria-label="Editar categoría"
+                  (click)="openEditCategory(cat)"
+                >
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon btn-icon--danger"
+                  aria-label="Eliminar categoría"
+                  (click)="deleteCategory(cat)"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="products-table__empty">No hay categorías registradas.</td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+      </div>
+
+    </p-tabPanel>
+
+  </p-tabView>
+
+</div>
+
+<!-- ====================================================================== -->
+<!-- Product create / edit dialog                                            -->
+<!-- ====================================================================== -->
+<p-dialog
+  [header]="editingProduct ? 'Editar producto' : 'Nuevo producto'"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '560px' }"
+  [draggable]="false"
+>
+  <div class="product-form">
+
+    <!-- Basic fields -->
+    <div class="form-field">
+      <label class="form-field__label" for="pf-name">Nombre</label>
+      <input
+        id="pf-name"
+        type="text"
+        pInputText
+        [(ngModel)]="form.name"
+        placeholder="Ej. Torta de Milanesa"
+        class="form-field__input"
+      />
+    </div>
+
+    <div class="form-field">
+      <label class="form-field__label" for="pf-price">Precio base (MXN)</label>
+      <p-inputNumber
+        inputId="pf-price"
+        mode="currency"
+        currency="MXN"
+        locale="es-MX"
+        [min]="0"
+        [ngModel]="form.priceCents / 100"
+        (onInput)="onPriceChange($event.value)"
+        styleClass="form-field__input"
+      />
+    </div>
+
+    <div class="form-field">
+      <label class="form-field__label" for="pf-category">Categoría</label>
+      <p-dropdown
+        inputId="pf-category"
+        [options]="categories()"
+        optionLabel="name"
+        optionValue="id"
+        [(ngModel)]="form.categoryId"
+        placeholder="Seleccionar categoría"
+        styleClass="form-field__input"
+        [appendTo]="'body'"
+      />
+    </div>
+
+    <div class="form-field form-field--row">
+      <label class="form-field__label" for="pf-active">Disponible</label>
+      <p-inputSwitch inputId="pf-active" [(ngModel)]="form.isAvailable" />
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Sizes                                                               -->
+    <!-- ------------------------------------------------------------------ -->
+    <div class="form-section">
+      <div class="form-section__header">
+        <span class="form-section__title">Tamaños</span>
+        <span class="form-section__hint">Precio = base + cargo extra</span>
+      </div>
+
+      @for (size of form.sizes; track $index) {
+        <div class="variant-row">
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="size.label"
+            placeholder="Ej. Chico, Grande"
+            class="variant-row__name"
+          />
+          <p-inputNumber
+            mode="currency"
+            currency="MXN"
+            locale="es-MX"
+            [min]="0"
+            [ngModel]="size.priceDeltaCents / 100"
+            (onInput)="onSizePriceChange($index, $event.value)"
+            styleClass="variant-row__price"
+            placeholder="+$0.00"
+          />
+          <button
+            type="button"
+            class="btn-icon btn-icon--danger"
+            aria-label="Eliminar tamaño"
+            (click)="removeSize($index)"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      }
+
+      <button type="button" class="btn-add-variant" (click)="addSize()">
+        <i class="pi pi-plus"></i>
+        Agregar tamaño
+      </button>
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Extras                                                              -->
+    <!-- ------------------------------------------------------------------ -->
+    <div class="form-section">
+      <div class="form-section__header">
+        <span class="form-section__title">Extras</span>
+        <span class="form-section__hint">Precio $0 = gratis</span>
+      </div>
+
+      @for (extra of form.extras; track $index) {
+        <div class="variant-row">
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="extra.label"
+            placeholder="Ej. Sin cebolla, Queso extra"
+            class="variant-row__name"
+          />
+          <p-inputNumber
+            mode="currency"
+            currency="MXN"
+            locale="es-MX"
+            [min]="0"
+            [ngModel]="extra.priceCents / 100"
+            (onInput)="onExtraPriceChange($index, $event.value)"
+            styleClass="variant-row__price"
+            placeholder="$0.00"
+          />
+          <button
+            type="button"
+            class="btn-icon btn-icon--danger"
+            aria-label="Eliminar extra"
+            (click)="removeExtra($index)"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      }
+
+      <button type="button" class="btn-add-variant" (click)="addExtra()">
+        <i class="pi pi-plus"></i>
+        Agregar extra
+      </button>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button type="button" class="btn-ghost" (click)="closeDialog()">Cancelar</button>
+    <button type="button" class="btn-primary" (click)="saveProduct()">Guardar</button>
+  </ng-template>
+</p-dialog>
+
+<!-- ====================================================================== -->
+<!-- Category create / edit dialog                                           -->
+<!-- ====================================================================== -->
+<p-dialog
+  [header]="editingCategory ? 'Editar categoría' : 'Nueva categoría'"
+  [(visible)]="catDialogVisible"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '380px' }"
+  [draggable]="false"
+>
+  <div class="product-form">
+
+    <div class="form-field">
+      <label class="form-field__label" for="cf-name">Nombre</label>
+      <input
+        id="cf-name"
+        type="text"
+        pInputText
+        [(ngModel)]="catForm.name"
+        placeholder="Ej. Bebidas"
+        class="form-field__input"
+      />
+    </div>
+
+    <div class="form-field">
+      <label class="form-field__label" for="cf-icon">Ícono</label>
+      <p-dropdown
+        inputId="cf-icon"
+        [options]="iconOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="catForm.icon"
+        placeholder="Seleccionar ícono"
+        styleClass="form-field__input"
+        [appendTo]="'body'"
+      >
+        <ng-template pTemplate="selectedItem" let-item>
+          <div class="icon-option">
+            <i [class]="'pi ' + item.value"></i>
+            <span>{{ item.label }}</span>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="item" let-item>
+          <div class="icon-option">
+            <i [class]="'pi ' + item.value"></i>
+            <span>{{ item.label }}</span>
+          </div>
+        </ng-template>
+      </p-dropdown>
+    </div>
+
+    <div class="form-field form-field--row">
+      <label class="form-field__label" for="cf-active">Activa</label>
+      <p-inputSwitch inputId="cf-active" [(ngModel)]="catForm.isActive" />
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button type="button" class="btn-ghost" (click)="closeCatDialog()">Cancelar</button>
+    <button type="button" class="btn-primary" (click)="saveCategory()">Guardar</button>
+  </ng-template>
+</p-dialog>

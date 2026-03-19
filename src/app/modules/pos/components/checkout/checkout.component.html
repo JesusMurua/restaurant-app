@@ -1,0 +1,193 @@
+<div class="checkout-page">
+
+  <!-- ================================================================== -->
+  <!-- STEP: payment                                                        -->
+  <!-- ================================================================== -->
+  @if (step() === 'payment') {
+
+    <!-- Header -->
+    <header class="checkout-header">
+      <button type="button" class="checkout-header__back" (click)="cancel()" aria-label="Cancelar y regresar">
+        <i class="pi pi-arrow-left"></i>
+        <span>Cancelar</span>
+      </button>
+      <span class="checkout-header__title">Cobrar orden</span>
+    </header>
+
+    <div class="checkout-body">
+
+      <!-- Order summary -->
+      <section class="checkout-summary">
+        <ul class="summary-list">
+          @for (item of cartItems; track item.id) {
+            <li class="summary-item">
+              <span class="summary-item__qty">{{ item.quantity }}×</span>
+              <span class="summary-item__name">
+                {{ item.product.name }}
+                @if (item.size) { <span class="summary-item__meta">({{ item.size.label }})</span> }
+              </span>
+              <span class="summary-item__price">{{ item.totalPriceCents | price }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <!-- Total -->
+      <div class="checkout-total">
+        <span class="checkout-total__label">Total a cobrar</span>
+        <span class="checkout-total__amount">{{ totalCents() | price }}</span>
+      </div>
+
+      <div class="checkout-divider"></div>
+
+      <!-- Payment method cards -->
+      <section class="checkout-methods">
+        <p class="checkout-methods__label">Método de pago</p>
+        <div class="checkout-methods__grid">
+
+          <button
+            type="button"
+            class="method-card"
+            [class.method-card--active]="selectedMethod() === 'cash'"
+            (click)="selectMethod('cash')"
+            aria-label="Pago en efectivo"
+          >
+            <i class="pi pi-wallet method-card__icon"></i>
+            <span class="method-card__name">Efectivo</span>
+          </button>
+
+          <button
+            type="button"
+            class="method-card"
+            [class.method-card--active]="selectedMethod() === 'card'"
+            (click)="selectMethod('card')"
+            aria-label="Pago con tarjeta"
+          >
+            <i class="pi pi-credit-card method-card__icon"></i>
+            <span class="method-card__name">Tarjeta</span>
+          </button>
+
+        </div>
+      </section>
+
+      <!-- Cash calculator — only shown when cash is selected -->
+      @if (selectedMethod() === 'cash') {
+        <section class="checkout-cash">
+          <label class="checkout-cash__label" for="tendered-input">
+            ¿Cuánto paga el cliente?
+          </label>
+
+          <p-inputNumber
+            inputId="tendered-input"
+            mode="currency"
+            currency="MXN"
+            locale="es-MX"
+            [min]="0"
+            [useGrouping]="true"
+            styleClass="tendered-input"
+            inputStyleClass="tendered-input__field"
+            placeholder="$0.00"
+            (onInput)="onTenderedChange($event.value)"
+          />
+
+          @if (tenderedCents() > 0) {
+            <div class="checkout-cash__change">
+              @if (changeCents() > 0) {
+                <span class="checkout-cash__change-label">Cambio a entregar</span>
+                <span class="checkout-cash__change-amount">{{ changeCents() | price }}</span>
+              } @else if (tenderedCents() < totalCents()) {
+                <span class="checkout-cash__change-label checkout-cash__change-label--error">
+                  Faltan {{ (totalCents() - tenderedCents()) | price }}
+                </span>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      <!-- Card note — no terminal yet -->
+      @if (selectedMethod() === 'card') {
+        <div class="checkout-card-note">
+          <i class="pi pi-info-circle"></i>
+          <span>Registra el pago con terminal externa. La integración automática estará disponible pronto.</span>
+        </div>
+      }
+
+    </div>
+
+    <!-- Confirm button -->
+    <footer class="checkout-footer">
+      <button
+        type="button"
+        class="btn-confirm"
+        [class.btn-confirm--disabled]="!canConfirm()"
+        [disabled]="!canConfirm()"
+        (click)="confirmPayment()"
+      >
+        <i class="pi pi-check"></i>
+        Confirmar pago
+      </button>
+    </footer>
+
+  }
+
+  <!-- ================================================================== -->
+  <!-- STEP: confirmed                                                      -->
+  <!-- ================================================================== -->
+  @if (step() === 'confirmed') {
+
+    <div class="checkout-confirmed">
+
+      <!-- Check icon -->
+      <div class="confirmed-icon" aria-hidden="true">
+        <i class="pi pi-check"></i>
+      </div>
+
+      <h1 class="confirmed-title">Orden completada</h1>
+
+      @if (completedOrder(); as order) {
+
+        <!-- Order details -->
+        <div class="confirmed-details">
+          <div class="confirmed-row">
+            <span class="confirmed-row__label">Orden</span>
+            <span class="confirmed-row__value">#{{ order.orderNumber }}</span>
+          </div>
+          <div class="confirmed-row">
+            <span class="confirmed-row__label">Total</span>
+            <span class="confirmed-row__value">{{ order.totalCents | price }}</span>
+          </div>
+          <div class="confirmed-row">
+            <span class="confirmed-row__label">Método</span>
+            <span class="confirmed-row__value">{{ order.paymentMethod === 'cash' ? 'Efectivo' : 'Tarjeta' }}</span>
+          </div>
+          @if (order.paymentMethod === 'cash' && order.tenderedCents) {
+            <div class="confirmed-row confirmed-row--change">
+              <span class="confirmed-row__label">Cambio</span>
+              <span class="confirmed-row__value confirmed-row__value--change">
+                {{ (order.tenderedCents - order.totalCents) | price }}
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- Ticket fallback -->
+        @if (showTicketFallback) {
+          <button type="button" class="btn-ticket" (click)="viewTicket()">
+            <i class="pi pi-print"></i>
+            Ver ticket
+          </button>
+        }
+
+      }
+
+      <!-- New order -->
+      <button type="button" class="btn-new-order" (click)="startNewOrder()">
+        Nueva orden
+      </button>
+
+    </div>
+
+  }
+
+</div>

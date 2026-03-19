@@ -1,0 +1,67 @@
+<!-- POS Main Layout: [Header] | [Category bar] | [Product grid] [Cart panel] -->
+<div class="pos-layout">
+
+  <!-- Top app bar -->
+  <app-pos-header />
+
+  <!-- Category Filter Bar -->
+  <nav class="pos-category-bar" aria-label="Categorías">
+    <button
+      type="button"
+      class="cat-pill"
+      [class.cat-pill--active]="selectedCategoryId() === null"
+      (click)="selectCategory(null)"
+    >
+      <i class="pi pi-list"></i>
+      <span>Todos</span>
+    </button>
+
+    @for (cat of categories(); track cat.id) {
+      <button
+        type="button"
+        class="cat-pill"
+        [class.cat-pill--active]="selectedCategoryId() === cat.id"
+        (click)="selectCategory(cat.id)"
+      >
+        @if (cat.icon) {
+          <i class="pi {{ cat.icon }}"></i>
+        }
+        <span>{{ cat.name }}</span>
+      </button>
+    }
+  </nav>
+
+  <!-- Main Content Area -->
+  <div class="pos-content">
+
+    <!-- Product Grid -->
+    <main class="pos-products" aria-label="Productos">
+
+      @if (isLoading()) {
+        <div class="pos-loading">
+          <p-progressSpinner strokeWidth="4" aria-label="Cargando productos" />
+        </div>
+      }
+
+      @for (product of filteredProducts(); track product.id) {
+        <app-product-card
+          [product]="product"
+          (selected)="onProductSelected($event)"
+        />
+      } @empty {
+        @if (!isLoading()) {
+          <div class="pos-empty">
+            <i class="pi pi-inbox"></i>
+            <p>No hay productos en esta categoría</p>
+          </div>
+        }
+      }
+
+    </main>
+
+    <!-- Cart Panel Sidebar -->
+    <app-cart-panel />
+
+  </div>
+
+</div>

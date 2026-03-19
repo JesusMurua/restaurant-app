@@ -1,0 +1,62 @@
+// =============================================================================
+// Design Tokens — POS Táctil
+// =============================================================================
+// These variables extend PrimeNG's theme tokens with POS-specific constraints.
+// PrimeNG CSS variables (--primary-color, --surface-*, etc.) are available
+// globally after the theme is loaded via angular.json.
+
+// -----------------------------------------------------------------------------
+// Touch UX — Non-negotiable minimums (CLAUDE.md)
+// -----------------------------------------------------------------------------
+$touch-target-min:    64px;   // Minimum tap area for all interactive elements
+$product-card-min:   140px;   // Minimum product card size (width and height)
+
+// -----------------------------------------------------------------------------
+// Typography
+// -----------------------------------------------------------------------------
+$font-size-base:      16px;   // Minimum body font size for legibility
+$font-size-price:     20px;   // Price display — must be clearly readable
+$font-size-label:     14px;   // Secondary labels (category tabs, meta info)
+$font-size-title:     22px;   // Section headings
+$font-weight-bold:      600;
+
+// -----------------------------------------------------------------------------
+// Spacing scale (based on PrimeFlex 8px grid)
+// -----------------------------------------------------------------------------
+$space-1:   4px;
+$space-2:   8px;
+$space-3:  12px;
+$space-4:  16px;
+$space-5:  24px;
+$space-6:  32px;
+$space-7:  48px;
+$space-8:  64px;
+
+// -----------------------------------------------------------------------------
+// Layout
+// -----------------------------------------------------------------------------
+$cart-panel-width:      340px;  // Sidebar cart width on desktop
+$category-bar-height:    64px;  // Category filter bar height (= touch target)
+$header-height:          60px;  // Top app bar height
+
+// -----------------------------------------------------------------------------
+// POS Color overrides
+// -----------------------------------------------------------------------------
+$color-primary:        #16A34A;  // Green — primary brand color
+$color-primary-light:  #F0FDF4;  // Green tint — icon backgrounds
+$color-price:          #16A34A;  // Green — price emphasis
+$color-price-total:    #16A34A;  // Green — order total
+$color-out-of-stock:   #9e9e9e;  // Grey — unavailable products
+$color-badge-bg:       #16A34A;  // Cart item count badge
+$color-text-title:     #111827;  // Dark — headings
+$color-text-sub:       #6B7280;  // Grey — secondary labels
+$color-bg-page:        #F9FAFB;  // Light grey — page background
+$color-border-soft:    #F3F4F6;  // Very light — separators
+
+// -----------------------------------------------------------------------------
+// Breakpoints (align with PrimeFlex)
+// -----------------------------------------------------------------------------
+$breakpoint-sm:   576px;
+$breakpoint-md:   768px;
+$breakpoint-lg:   992px;
+$breakpoint-xl:  1200px;

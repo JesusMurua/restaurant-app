@@ -1,0 +1,108 @@
+@if (product(); as p) {
+  <div class="detail-page">
+
+    <!-- Back button + header -->
+    <header class="detail-header">
+      <p-button
+        icon="pi pi-arrow-left"
+        [text]="true"
+        [rounded]="true"
+        aria-label="Regresar"
+        (onClick)="location.back()"
+      />
+      <div class="detail-header__info">
+        <h1 class="detail-header__name">{{ p.name }}</h1>
+        <span class="detail-header__base-price">Precio base: {{ p.priceCents | price }}</span>
+      </div>
+    </header>
+
+    <div class="detail-divider"></div>
+
+    <!-- Form — scrollable body -->
+    <form [formGroup]="form" class="detail-form">
+
+      <!-- Size selection -->
+      @if (p.sizes.length > 0) {
+        <section class="detail-section">
+          <h2 class="detail-section__title">Tamaño</h2>
+          <div class="detail-sizes">
+            @for (size of p.sizes; track size.id) {
+              <label class="size-option" [for]="'size-' + size.id">
+                <p-radioButton
+                  formControlName="sizeId"
+                  [value]="size.id"
+                  [inputId]="'size-' + size.id"
+                />
+                <span class="size-option__label">{{ size.label }}</span>
+                @if (size.priceDeltaCents > 0) {
+                  <span class="size-option__delta">+ {{ size.priceDeltaCents | price }}</span>
+                }
+              </label>
+            }
+          </div>
+        </section>
+        <div class="detail-divider"></div>
+      }
+
+      <!-- Extras selection -->
+      @if (p.extras.length > 0) {
+        <section class="detail-section">
+          <h2 class="detail-section__title">Extras</h2>
+          <div class="detail-extras" formArrayName="extras">
+            @for (extra of p.extras; track extra.id; let i = $index) {
+              <label class="extra-option" [for]="'extra-' + extra.id">
+                <p-checkbox
+                  [formControlName]="i"
+                  [binary]="true"
+                  [inputId]="'extra-' + extra.id"
+                />
+                <span class="extra-option__label">{{ extra.label }}</span>
+                @if (extra.priceCents > 0) {
+                  <span class="extra-option__price">+ {{ extra.priceCents | price }}</span>
+                } @else {
+                  <span class="extra-option__price extra-option__price--free">Gratis</span>
+                }
+              </label>
+            }
+          </div>
+        </section>
+        <div class="detail-divider"></div>
+      }
+
+      <!-- Notes -->
+      <section class="detail-section">
+        <h2 class="detail-section__title">Notas para cocina <span class="detail-section__optional">(opcional)</span></h2>
+        <textarea
+          formControlName="notes"
+          pInputTextarea
+          [autoResize]="true"
+          placeholder="Sin cebolla, extra picante…"
+          class="detail-notes"
+          id="notes"
+          rows="2"
+        ></textarea>
+      </section>
+
+    </form>
+
+    <!-- Sticky footer: outside form so overflow-y: auto on form doesn't clip it -->
+    <footer class="detail-footer">
+      <div class="detail-footer__preview">
+        <span class="detail-footer__total-label">Total:</span>
+        <span class="detail-footer__total pos-price">{{ previewPriceCents() | price }}</span>
+      </div>
+
+      <div class="detail-footer__actions">
+        <p-button
+          icon="pi pi-plus"
+          label="Agregar a la orden"
+          size="large"
+          styleClass="detail-footer__add-btn"
+          type="button"
+          (onClick)="onAddToCart()"
+        />
+      </div>
+    </footer>
+
+  </div>
+}

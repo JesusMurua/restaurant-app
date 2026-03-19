@@ -1,0 +1,65 @@
+<div class="pin-page">
+
+  <!-- Back to POS -->
+  <button type="button" class="pin-back" (click)="goToPOS()" aria-label="Volver al POS">
+    <i class="pi pi-arrow-left"></i>
+    <span>Volver al POS</span>
+  </button>
+
+  <div class="pin-card">
+
+    <!-- Title -->
+    <div class="pin-header">
+      <div class="pin-header__logo" aria-hidden="true">
+        <i class="pi pi-lock"></i>
+      </div>
+      <h1 class="pin-header__title">Acceso administrativo</h1>
+      <p class="pin-header__subtitle">Ingresa tu PIN de 4 dígitos</p>
+    </div>
+
+    <!-- Dots display -->
+    <div
+      class="pin-dots"
+      [class.pin-dots--error]="hasError()"
+      aria-label="PIN ingresado"
+      aria-live="polite"
+    >
+      @for (i of [0, 1, 2, 3]; track i) {
+        <span class="pin-dot" [class.pin-dot--filled]="digits().length > i"></span>
+      }
+    </div>
+
+    @if (hasError()) {
+      <p class="pin-error">PIN incorrecto. Intenta de nuevo.</p>
+    }
+
+    <!-- Numpad 3×4 -->
+    <div class="pin-numpad" role="group" aria-label="Teclado numérico">
+      @for (key of keys; track $index) {
+        @if (key === null) {
+          <span class="pin-key pin-key--empty"></span>
+        } @else if (key === 'del') {
+          <button
+            type="button"
+            class="pin-key pin-key--del"
+            aria-label="Borrar último dígito"
+            (click)="removeDigit()"
+          >
+            <i class="pi pi-delete-left"></i>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="pin-key"
+            [attr.aria-label]="'Dígito ' + key"
+            (click)="addDigit(key)"
+          >
+            {{ key }}
+          </button>
+        }
+      }
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,99 @@
+@use '../../../styles/variables' as *;
+
+.kiosk-shell {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+// -----------------------------------------------------------------------
+// Idle overlay — full-screen backdrop with centered card
+// -----------------------------------------------------------------------
+.idle-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-5;
+}
+
+.idle-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-4;
+  background: white;
+  border-radius: 24px;
+  padding: $space-6;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+
+  &__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #FEF3C7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: 32px;
+      color: #D97706;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: 17px;
+    color: $color-text-sub;
+    line-height: 1.5;
+
+    strong {
+      font-size: 22px;
+      font-weight: 700;
+      color: $color-text-title;
+    }
+  }
+
+  &__btn {
+    width: 100%;
+    min-height: 80px;
+    border: none;
+    border-radius: 16px;
+    background: $color-primary;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover { background: #15803D; }
+    &:active { background: #166534; }
+  }
+
+  &__cancel {
+    background: transparent;
+    border: none;
+    color: $color-text-sub;
+    font-size: $font-size-base;
+    font-family: inherit;
+    cursor: pointer;
+    padding: $space-2;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}

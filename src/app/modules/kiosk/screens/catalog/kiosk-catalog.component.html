@@ -1,0 +1,73 @@
+<div class="kiosk-catalog">
+
+  <!-- Category pills -->
+  <nav class="kiosk-catalog__cats" aria-label="Categorías">
+    <button
+      type="button"
+      class="cat-pill"
+      [class.cat-pill--active]="selectedCategoryId() === null"
+      (click)="selectCategory(null)"
+    >
+      Todos
+    </button>
+
+    @for (cat of categories(); track cat.id) {
+      <button
+        type="button"
+        class="cat-pill"
+        [class.cat-pill--active]="selectedCategoryId() === cat.id"
+        (click)="selectCategory(cat.id)"
+      >
+        @if (cat.icon) { <i [class]="'pi ' + cat.icon"></i> }
+        {{ cat.name }}
+      </button>
+    }
+  </nav>
+
+  <!-- Product grid -->
+  <main class="kiosk-catalog__grid">
+    @if (isLoading()) {
+      <div class="kiosk-catalog__loading">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Cargando productos...</span>
+      </div>
+    }
+
+    @for (product of filteredProducts(); track product.id) {
+      <button
+        type="button"
+        class="kiosk-card"
+        (click)="onProductTapped(product)"
+      >
+        <div class="kiosk-card__icon-box">
+          <i class="pi pi-box"></i>
+        </div>
+        <span class="kiosk-card__name">{{ product.name }}</span>
+        <span class="kiosk-card__price">{{ product.priceCents | price }}</span>
+      </button>
+    }
+
+    @empty {
+      @if (!isLoading()) {
+        <p class="kiosk-catalog__empty">No hay productos en esta categoría.</p>
+      }
+    }
+  </main>
+
+  <!-- Bottom bar: cancel + FAB cart -->
+  <footer class="kiosk-catalog__footer">
+    <button type="button" class="kiosk-btn-cancel" (click)="cancelOrder()">
+      <i class="pi pi-times"></i>
+      Cancelar
+    </button>
+
+    @if (cartItemCount() > 0) {
+      <button type="button" class="kiosk-btn-cart" (click)="goToSummary()">
+        <span class="kiosk-btn-cart__badge">{{ cartItemCount() }}</span>
+        <i class="pi pi-shopping-cart"></i>
+        Ver orden
+      </button>
+    }
+  </footer>
+
+</div>

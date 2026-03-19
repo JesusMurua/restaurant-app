@@ -1,0 +1,231 @@
+@use '../../../../../styles/variables' as *;
+
+.cart-panel {
+  display: flex;
+  flex-direction: column;
+  width: $cart-panel-width;
+  height: 100%;
+  background: white;
+  border-left: 1px solid $color-border-soft;
+  flex-shrink: 0;
+
+  // -----------------------------------------------------------------------
+  // Header
+  // -----------------------------------------------------------------------
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-4;
+  }
+
+  &__title {
+    font-size: $font-size-title;
+    font-weight: 700;
+    color: $color-text-title;
+    flex: 1;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 $space-2;
+    background: $color-primary;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 9999px;
+  }
+
+  // -----------------------------------------------------------------------
+  // Soft divider
+  // -----------------------------------------------------------------------
+  &__divider {
+    height: 1px;
+    background: $color-border-soft;
+    flex-shrink: 0;
+  }
+
+  // -----------------------------------------------------------------------
+  // Item list
+  // -----------------------------------------------------------------------
+  &__items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 $space-4;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $space-3;
+    padding: $space-7 $space-4;
+    color: $color-text-sub;
+
+    i { font-size: 3rem; }
+    p { margin: 0; font-size: $font-size-base; }
+  }
+
+  // -----------------------------------------------------------------------
+  // Footer
+  // -----------------------------------------------------------------------
+  &__footer {
+    padding: $space-4;
+    border-top: 1px solid $color-border-soft;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+  }
+
+  &__total-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__total-label {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-sub;
+  }
+
+  &__total-amount {
+    font-size: 22px;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Cart item
+// -----------------------------------------------------------------------
+.cart-item {
+  padding: $space-3 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+  }
+
+  &__name {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+  }
+
+  &__meta {
+    font-size: $font-size-label;
+    color: $color-text-sub;
+  }
+
+  &__notes {
+    font-style: italic;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__qty {
+    font-size: $font-size-base;
+    font-weight: 700;
+    min-width: 2rem;
+    text-align: center;
+    color: $color-text-title;
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__total {
+    font-size: $font-size-base;
+    font-weight: 700;
+    color: $color-primary;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Quantity control button
+// -----------------------------------------------------------------------
+.qty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  background: white;
+  color: $color-text-title;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.1s, border-color 0.1s;
+
+  i { font-size: 12px; }
+
+  &:hover {
+    background: #F9FAFB;
+    border-color: #D1D5DB;
+  }
+
+  &:active {
+    background: #F3F4F6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Checkout button override
+// -----------------------------------------------------------------------
+:host ::ng-deep .btn-checkout {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 10px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+}
+
+// -----------------------------------------------------------------------
+// Cancel order button
+// -----------------------------------------------------------------------
+.btn-cancel {
+  width: 100%;
+  padding: $space-3;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #DC2626;
+  font-size: $font-size-base;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #FEF2F2;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #DC2626;
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,284 @@
+@use '../../../../../styles/variables' as *;
+
+// ============================================================================
+// Admin Settings
+// ============================================================================
+
+.admin-settings {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+  max-width: 640px;
+
+  &__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Section
+// -----------------------------------------------------------------------
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+
+  &__desc {
+    margin: 0;
+    font-size: $font-size-label;
+    color: $color-text-sub;
+  }
+}
+
+// Device-only badge
+.device-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #1D4ED8;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  padding: 3px 8px;
+  border-radius: 6px;
+
+  i { font-size: 11px; }
+}
+
+.settings-divider {
+  height: 1px;
+  background: $color-border-soft;
+}
+
+// -----------------------------------------------------------------------
+// Form layout
+// -----------------------------------------------------------------------
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+
+  &__label {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Mode cards (radio buttons styled like payment method cards)
+// -----------------------------------------------------------------------
+.mode-cards {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.mode-card {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  padding: $space-4;
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+
+  &:hover:not(.mode-card--active):not(.mode-card--disabled) {
+    border-color: #D1D5DB;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  &--active {
+    border-color: $color-primary;
+    background: $color-primary-light;
+    box-shadow: 0 0 0 1px $color-primary;
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+  }
+
+  &__desc {
+    font-size: $font-size-label;
+    color: $color-text-sub;
+  }
+
+  &__soon {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #D97706;
+    background: #FEF3C7;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  &__badge {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #1D4ED8;
+    background: #EFF6FF;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Kiosk info note
+// -----------------------------------------------------------------------
+.kiosk-note {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  background: #EFF6FF;
+  border-radius: 10px;
+  color: #1D4ED8;
+  font-size: $font-size-label;
+
+  i { flex-shrink: 0; margin-top: 2px; }
+}
+
+// -----------------------------------------------------------------------
+// Actions row
+// -----------------------------------------------------------------------
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+
+  &__ok {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    font-size: $font-size-label;
+    font-weight: 600;
+    color: $color-primary;
+
+    i { font-size: 16px; }
+  }
+}
+
+// -----------------------------------------------------------------------
+// Buttons
+// -----------------------------------------------------------------------
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-4;
+  min-height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: $color-primary;
+  color: white;
+  font-size: $font-size-base;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  i { font-size: 14px; }
+
+  &:hover:not(:disabled) { background: #15803D; }
+  &:active:not(:disabled) { background: #166534; }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// -----------------------------------------------------------------------
+// PIN feedback
+// -----------------------------------------------------------------------
+.pin-error,
+.pin-success {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $font-size-label;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: $space-3 $space-4;
+  margin: 0;
+
+  i { flex-shrink: 0; }
+}
+
+.pin-error {
+  color: #DC2626;
+  background: #FEF2F2;
+}
+
+.pin-success {
+  color: $color-primary;
+  background: $color-primary-light;
+}
+
+// -----------------------------------------------------------------------
+// PrimeNG p-password pin fields
+// -----------------------------------------------------------------------
+:host ::ng-deep .pin-input {
+  width: 100%;
+  max-width: 200px;
+
+  .pin-input__field,
+  .p-password-input {
+    width: 100%;
+    font-size: 20px;
+    letter-spacing: 0.25em;
+    text-align: center;
+    border-radius: 8px;
+  }
+}

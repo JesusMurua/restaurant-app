@@ -1,18 +1,29 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# ================================================
+# POS Táctil — .gitignore
+# Angular 18 + PWA + PrimeNG
+# ================================================
 
-# compiled output
+# Compiled output
 /dist
 /tmp
 /out-tsc
-# Only exists if Bazel was run
 /bazel-out
 
-# dependencies
+# Dependencies
 /node_modules
 
-# profiling files
-chrome-profiler-events*.json
-speed-measure-plugin*.json
+# Angular cache (new in Angular 13+)
+.angular/
+
+# PWA — generated at build time, not source
+# ngsw.json is auto-generated, ngsw-config.json IS source (keep it)
+# dist/ already ignored above
+
+# Environment files (never commit secrets)
+src/environments/environment.prod.ts
+.env
+.env.*
+!.env.example
 
 # IDEs and editors
 /.idea
@@ -23,7 +34,7 @@ speed-measure-plugin*.json
 .settings/
 *.sublime-workspace
 
-# IDE - VSCode
+# VSCode — keep shared settings, ignore personal
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -31,7 +42,14 @@ speed-measure-plugin*.json
 !.vscode/extensions.json
 .history/*
 
-# misc
+# Netlify (already in repo but generated)
+.netlify/
+
+# Profiling files
+chrome-profiler-events*.json
+speed-measure-plugin*.json
+
+# Misc
 /.sass-cache
 /connect.lock
 /coverage
@@ -41,6 +59,7 @@ yarn-error.log
 testem.log
 /typings
 
-# System Files
+# System files
 .DS_Store
 Thumbs.db
+*.orig

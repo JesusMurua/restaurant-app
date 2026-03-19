@@ -1,0 +1,192 @@
+@use '../../../styles/variables' as *;
+
+// ============================================================================
+// PIN Screen — full page, centered card
+// ============================================================================
+
+.pin-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  background: $color-bg-page;
+  padding: $space-4;
+  position: relative;
+}
+
+// -----------------------------------------------------------------------
+// Back button (top-left)
+// -----------------------------------------------------------------------
+.pin-back {
+  position: absolute;
+  top: $space-4;
+  left: $space-4;
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: $color-text-sub;
+  font-size: $font-size-base;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  i { font-size: 14px; }
+
+  &:hover { background: #E5E7EB; }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+}
+
+// -----------------------------------------------------------------------
+// Card container
+// -----------------------------------------------------------------------
+.pin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-5;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: $space-6 $space-5;
+  width: 100%;
+  max-width: 360px;
+}
+
+// -----------------------------------------------------------------------
+// Header
+// -----------------------------------------------------------------------
+.pin-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  text-align: center;
+
+  &__logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: $color-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $space-1;
+
+    i {
+      font-size: 22px;
+      color: white;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: $font-size-label;
+    color: $color-text-sub;
+  }
+}
+
+// -----------------------------------------------------------------------
+// PIN dots
+// -----------------------------------------------------------------------
+.pin-dots {
+  display: flex;
+  gap: $space-3;
+
+  &--error {
+    animation: shake 0.5s ease;
+  }
+}
+
+.pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #D1D5DB;
+  background: transparent;
+  transition: background 0.15s, border-color 0.15s;
+
+  &--filled {
+    background: $color-primary;
+    border-color: $color-primary;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Error message
+// -----------------------------------------------------------------------
+.pin-error {
+  margin: 0;
+  font-size: $font-size-label;
+  color: #DC2626;
+  text-align: center;
+}
+
+// -----------------------------------------------------------------------
+// Numpad — 3 columns × 4 rows
+// -----------------------------------------------------------------------
+.pin-numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-3;
+  width: 100%;
+}
+
+.pin-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 72px;
+  border: none;
+  border-radius: 12px;
+  background: #F3F4F6;
+  color: $color-text-title;
+  font-size: 24px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.1s, transform 0.1s;
+  user-select: none;
+
+  &:hover { background: #E5E7EB; }
+  &:active { background: #D1D5DB; transform: scale(0.95); }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+
+  &--del {
+    background: #FEF2F2;
+    color: #DC2626;
+    font-size: 20px;
+
+    &:hover { background: #FEE2E2; }
+    &:active { background: #FECACA; }
+  }
+
+  &--empty {
+    background: transparent;
+    pointer-events: none;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Shake animation for wrong PIN
+// -----------------------------------------------------------------------
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-8px); }
+  30%       { transform: translateX(8px); }
+  45%       { transform: translateX(-6px); }
+  60%       { transform: translateX(6px); }
+  75%       { transform: translateX(-4px); }
+  90%       { transform: translateX(4px); }
+}

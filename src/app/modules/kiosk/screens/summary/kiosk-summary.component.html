@@ -1,0 +1,65 @@
+<div class="kiosk-summary">
+
+  <!-- Header -->
+  <header class="kiosk-summary__header">
+    <button
+      type="button"
+      class="kiosk-summary__back"
+      aria-label="Agregar más productos"
+      (click)="goBack()"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </button>
+    <h1 class="kiosk-summary__title">Tu orden</h1>
+  </header>
+
+  <!-- Items list -->
+  <main class="kiosk-summary__body">
+    <ul class="kiosk-summary__list">
+      @for (item of items(); track item.id) {
+        <li class="kiosk-summary__item">
+          <span class="kiosk-summary__qty">{{ item.quantity }}×</span>
+          <div class="kiosk-summary__item-info">
+            <span class="kiosk-summary__item-name">{{ item.product.name }}</span>
+            @if (item.size) {
+              <span class="kiosk-summary__item-meta">{{ item.size.label }}</span>
+            }
+            @if (item.extras.length > 0) {
+              <span class="kiosk-summary__item-meta">
+                + {{ extrasLabel(item) }}
+              </span>
+            }
+          </div>
+          <span class="kiosk-summary__item-price">{{ item.totalPriceCents | price }}</span>
+        </li>
+      }
+    </ul>
+
+    <!-- Total -->
+    <div class="kiosk-summary__total">
+      <span class="kiosk-summary__total-label">Total</span>
+      <span class="kiosk-summary__total-amount">{{ totalCents() | price }}</span>
+    </div>
+  </main>
+
+  <!-- Footer actions -->
+  <footer class="kiosk-summary__footer">
+    <button
+      type="button"
+      class="kiosk-summary__btn-cancel"
+      (click)="cancelOrder()"
+    >
+      <i class="pi pi-times"></i>
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="kiosk-summary__btn-confirm"
+      (click)="confirmOrder()"
+    >
+      <i class="pi pi-check"></i>
+      Confirmar orden
+    </button>
+  </footer>
+
+</div>

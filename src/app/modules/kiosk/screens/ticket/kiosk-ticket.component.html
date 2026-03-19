@@ -1,0 +1,52 @@
+<div class="kiosk-ticket">
+
+  <!-- Check icon -->
+  <div class="kiosk-ticket__icon">
+    <i class="pi pi-check"></i>
+  </div>
+
+  <!-- Order number -->
+  <div class="kiosk-ticket__order-block">
+    <span class="kiosk-ticket__order-label">Número de orden</span>
+    <span class="kiosk-ticket__order-num">#{{ orderNumber() }}</span>
+  </div>
+
+  <!-- Total -->
+  <div class="kiosk-ticket__total-block">
+    <span class="kiosk-ticket__total-label">Total a pagar</span>
+    <span class="kiosk-ticket__total">{{ totalCents() | price }}</span>
+  </div>
+
+  <!-- Instruction -->
+  <p class="kiosk-ticket__instruction">
+    <i class="pi pi-info-circle"></i>
+    Presenta este número en caja para pagar
+  </p>
+
+  <!-- Actions -->
+  <div class="kiosk-ticket__actions">
+    <button
+      type="button"
+      class="kiosk-ticket__btn-whatsapp"
+      (click)="openWhatsApp()"
+    >
+      <i class="pi pi-whatsapp"></i>
+      Enviar ticket por WhatsApp
+    </button>
+
+    <button
+      type="button"
+      class="kiosk-ticket__btn-new"
+      (click)="newOrder()"
+    >
+      <i class="pi pi-refresh"></i>
+      Nueva orden
+    </button>
+  </div>
+
+  <!-- Auto-reset countdown -->
+  <p class="kiosk-ticket__countdown">
+    Volviendo al inicio en {{ countdown() }}s…
+  </p>
+
+</div>

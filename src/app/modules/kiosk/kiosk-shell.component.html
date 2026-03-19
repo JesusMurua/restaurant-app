@@ -1,0 +1,39 @@
+<div class="kiosk-shell">
+
+  <!-- Child screens render here -->
+  <router-outlet />
+
+  <!-- ================================================================== -->
+  <!-- Idle overlay — shown after 3 minutes of inactivity                 -->
+  <!-- ================================================================== -->
+  @if (showIdleOverlay()) {
+    <div class="idle-overlay" role="alertdialog" aria-modal="true" aria-label="Sesión inactiva">
+      <div class="idle-card">
+        <div class="idle-card__icon">
+          <i class="pi pi-clock"></i>
+        </div>
+        <h2 class="idle-card__title">¿Sigues ahí?</h2>
+        <p class="idle-card__desc">
+          Tu sesión se reiniciará en
+          <strong>{{ idleCountdown() }}</strong>
+          segundo{{ idleCountdown() === 1 ? '' : 's' }}.
+        </p>
+        <button
+          type="button"
+          class="idle-card__btn"
+          (click)="continueSession()"
+        >
+          Continuar ordenando
+        </button>
+        <button
+          type="button"
+          class="idle-card__cancel"
+          (click)="resetToWelcome()"
+        >
+          Cancelar orden
+        </button>
+      </div>
+    </div>
+  }
+
+</div>

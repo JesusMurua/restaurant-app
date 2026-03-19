@@ -1,0 +1,446 @@
+@use '../../../../../styles/variables' as *;
+
+// ============================================================================
+// Checkout page — full screen, two steps: payment | confirmed
+// ============================================================================
+
+.checkout-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: $color-bg-page;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+// -----------------------------------------------------------------------
+// Header
+// -----------------------------------------------------------------------
+.checkout-header {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  background: white;
+  border-bottom: 1px solid $color-border-soft;
+  flex-shrink: 0;
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-3;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: $color-text-sub;
+    font-size: $font-size-base;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    i { font-size: 14px; }
+
+    &:hover { background: #F3F4F6; }
+    &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: $color-text-title;
+    flex: 1;
+    text-align: center;
+    margin-right: 80px; // compensate for back button width so title appears centered
+  }
+}
+
+// -----------------------------------------------------------------------
+// Scrollable body
+// -----------------------------------------------------------------------
+.checkout-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $space-5 $space-4;
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+// -----------------------------------------------------------------------
+// Order summary list
+// -----------------------------------------------------------------------
+.checkout-summary {
+  background: white;
+  border-radius: 12px;
+  padding: $space-3 $space-4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.summary-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.summary-item {
+  display: flex;
+  align-items: baseline;
+  gap: $space-2;
+
+  &__qty {
+    font-size: $font-size-label;
+    font-weight: 700;
+    color: $color-primary;
+    min-width: 24px;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    flex: 1;
+    font-size: $font-size-base;
+    color: $color-text-title;
+  }
+
+  &__meta {
+    font-size: $font-size-label;
+    color: $color-text-sub;
+    margin-left: $space-1;
+  }
+
+  &__price {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+    flex-shrink: 0;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Total
+// -----------------------------------------------------------------------
+.checkout-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-3 $space-4;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+  &__label {
+    font-size: $font-size-base;
+    color: $color-text-sub;
+    font-weight: 500;
+  }
+
+  &__amount {
+    font-size: 28px;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+}
+
+.checkout-divider {
+  height: 1px;
+  background: $color-border-soft;
+}
+
+// -----------------------------------------------------------------------
+// Payment method cards
+// -----------------------------------------------------------------------
+.checkout-methods {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  &__label {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+    margin: 0;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-3;
+  }
+}
+
+.method-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  min-height: 88px;
+  padding: $space-4;
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+
+  &__icon {
+    font-size: 24px;
+    color: $color-text-sub;
+    transition: color 0.15s;
+  }
+
+  &__name {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+  }
+
+  &:hover:not(.method-card--active) {
+    border-color: #D1D5DB;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  &--active {
+    border-color: $color-primary;
+    background: $color-primary-light;
+    box-shadow: 0 0 0 1px $color-primary;
+
+    .method-card__icon { color: $color-primary; }
+    .method-card__name { color: $color-primary; }
+  }
+}
+
+// -----------------------------------------------------------------------
+// Cash calculator
+// -----------------------------------------------------------------------
+.checkout-cash {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  &__label {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+  }
+
+  &__change {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $space-3 $space-4;
+    background: $color-primary-light;
+    border-radius: 10px;
+  }
+
+  &__change-label {
+    font-size: $font-size-base;
+    color: $color-text-sub;
+
+    &--error {
+      color: #DC2626;
+    }
+  }
+
+  &__change-amount {
+    font-size: 22px;
+    font-weight: 700;
+    color: $color-primary;
+  }
+}
+
+// InputNumber override — large touch-friendly field
+:host ::ng-deep .tendered-input {
+  width: 100%;
+
+  .tendered-input__field,
+  .p-inputnumber-input {
+    width: 100%;
+    height: 64px;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: right;
+    border-radius: 10px;
+    padding: 0 $space-4;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Card note
+// -----------------------------------------------------------------------
+.checkout-card-note {
+  display: flex;
+  align-items: flex-start;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  background: #EFF6FF;
+  border-radius: 10px;
+  color: #1D4ED8;
+  font-size: $font-size-label;
+
+  i { flex-shrink: 0; margin-top: 2px; }
+}
+
+// -----------------------------------------------------------------------
+// Confirm button footer
+// -----------------------------------------------------------------------
+.checkout-footer {
+  padding: $space-4;
+  background: white;
+  border-top: 1px solid $color-border-soft;
+  flex-shrink: 0;
+}
+
+.btn-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-3;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 12px;
+  background: $color-primary;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  i { font-size: 18px; }
+
+  &:hover:not(:disabled) { background: #15803D; }
+  &:active:not(:disabled) { background: #166534; }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+
+  &--disabled,
+  &:disabled {
+    background: #E5E7EB;
+    color: #9CA3AF;
+    cursor: not-allowed;
+  }
+}
+
+// ============================================================================
+// Confirmed step
+// ============================================================================
+.checkout-confirmed {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $space-6 $space-4;
+  gap: $space-5;
+  text-align: center;
+}
+
+.confirmed-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 36px;
+    color: white;
+  }
+}
+
+.confirmed-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: $color-text-title;
+}
+
+.confirmed-details {
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.confirmed-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid $color-border-soft;
+
+  &:last-child { border-bottom: none; }
+
+  &__label {
+    font-size: $font-size-base;
+    color: $color-text-sub;
+  }
+
+  &__value {
+    font-size: $font-size-base;
+    font-weight: 700;
+    color: $color-text-title;
+
+    &--change {
+      font-size: 20px;
+      color: $color-primary;
+    }
+  }
+
+  &--change {
+    background: $color-primary-light;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Confirmed action buttons
+// -----------------------------------------------------------------------
+.btn-new-order {
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 12px;
+  background: $color-primary;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #15803D; }
+  &:active { background: #166534; }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+}
+
+.btn-ticket {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3 $space-5;
+  border: 1.5px solid $color-primary;
+  border-radius: 10px;
+  background: transparent;
+  color: $color-primary;
+  font-size: $font-size-base;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: $color-primary-light; }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+}

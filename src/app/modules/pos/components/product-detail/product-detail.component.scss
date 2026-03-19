@@ -1,0 +1,188 @@
+@use '../../../../../styles/variables' as *;
+
+.detail-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;        // Background fills screen but content drives height
+  background: $color-bg-page;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+// -----------------------------------------------------------------------
+// Header
+// -----------------------------------------------------------------------
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  background: white;
+  flex-shrink: 0;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $space-1;
+  }
+
+  &__name {
+    margin: 0;
+    font-size: $font-size-title;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+
+  &__base-price {
+    font-size: $font-size-label;
+    color: $color-text-sub;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Soft divider (replaces p-divider to avoid extra DOM weight)
+// -----------------------------------------------------------------------
+.detail-divider {
+  height: 1px;
+  background: $color-border-soft;
+  flex-shrink: 0;
+}
+
+// -----------------------------------------------------------------------
+// Form — natural height, footer follows content
+// -----------------------------------------------------------------------
+.detail-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-section {
+  padding: $space-4;
+
+  &__title {
+    margin: 0 0 $space-3;
+    font-size: $font-size-base;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+
+  &__optional {
+    font-weight: 400;
+    font-size: $font-size-label;
+    color: $color-text-sub;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Size options
+// -----------------------------------------------------------------------
+.detail-sizes {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.size-option {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  min-height: $touch-target-min;
+  padding: $space-2 $space-3;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+
+  &__label {
+    flex: 1;
+    font-size: $font-size-base;
+    color: $color-text-title;
+  }
+
+  &__delta {
+    font-size: $font-size-label;
+    color: $color-primary;
+    font-weight: 700;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Extras options
+// -----------------------------------------------------------------------
+.detail-extras {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.extra-option {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  min-height: $touch-target-min;
+  padding: $space-2 $space-3;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+
+  &__label {
+    flex: 1;
+    font-size: $font-size-base;
+    color: $color-text-title;
+  }
+
+  &__price {
+    font-size: $font-size-label;
+    font-weight: 700;
+    color: $color-primary;
+
+    &--free {
+      color: $color-primary;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------
+// Notes textarea
+// -----------------------------------------------------------------------
+.detail-notes {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: $font-size-base;
+  resize: none;
+}
+
+// -----------------------------------------------------------------------
+// Sticky footer — outside the form, naturally at the bottom of flex column
+// -----------------------------------------------------------------------
+.detail-footer {
+  flex-shrink: 0;
+  padding: $space-4;
+  background: white;
+  border-top: 1px solid $color-border-soft;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  &__preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__total-label {
+    font-size: $font-size-base;
+    color: $color-text-sub;
+  }
+
+  &__total {
+    font-size: $font-size-title;
+    font-weight: 700;
+    color: $color-primary;
+  }
+}
+
+:host ::ng-deep .detail-footer__add-btn {
+  width: 100%;
+  min-height: $touch-target-min;
+  border-radius: 10px !important;
+}

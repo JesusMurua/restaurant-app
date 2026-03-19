@@ -1,0 +1,28 @@
+<div class="kiosk-welcome">
+
+  <!-- Logo — long-press 3s to access admin -->
+  <div
+    class="kiosk-welcome__logo"
+    role="img"
+    aria-label="Logo del negocio"
+    (pointerdown)="onLogoPressStart($event)"
+    (pointerup)="onLogoPressEnd()"
+    (pointercancel)="onLogoPressEnd()"
+  >
+    <i class="pi pi-home"></i>
+  </div>
+
+  <!-- Business name -->
+  <h1 class="kiosk-welcome__name">{{ businessName() }}</h1>
+
+  <!-- CTA -->
+  <button
+    type="button"
+    class="kiosk-welcome__cta"
+    (click)="startOrder()"
+  >
+    <i class="pi pi-hand-pointer"></i>
+    Toca para ordenar
+  </button>
+
+</div>

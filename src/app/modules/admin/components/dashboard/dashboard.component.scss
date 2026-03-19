@@ -1,0 +1,262 @@
+@use '../../../../../styles/variables' as *;
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+
+  &__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    color: $color-text-sub;
+    font-size: $font-size-base;
+
+    i { font-size: 20px; }
+  }
+
+  &__columns {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: $space-5;
+    align-items: start;
+
+    @media (max-width: #{$breakpoint-md}) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------
+// KPI grid
+// -----------------------------------------------------------------------
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $space-4;
+
+  @media (max-width: #{$breakpoint-lg}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: #{$breakpoint-sm}) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  padding: $space-4 $space-5;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+
+  &__label {
+    font-size: $font-size-label;
+    color: $color-text-sub;
+    font-weight: 500;
+  }
+
+  &__value {
+    font-size: 24px;
+    font-weight: 700;
+    color: $color-text-title;
+
+    &--primary { color: $color-primary; }
+  }
+
+  &__empty {
+    font-size: $font-size-base;
+    color: $color-text-sub;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Section card (corte, top productos, órdenes)
+// -----------------------------------------------------------------------
+.section-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  padding: $space-4 $space-5;
+
+  &--wide { overflow: hidden; }
+
+  &__title {
+    margin: 0 0 $space-4;
+    font-size: $font-size-base;
+    font-weight: 700;
+    color: $color-text-title;
+  }
+
+  &__empty {
+    margin: 0;
+    font-size: $font-size-base;
+    color: $color-text-sub;
+    text-align: center;
+    padding: $space-4 0;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Badges
+// -----------------------------------------------------------------------
+.badge {
+  display: inline-block;
+  padding: 3px $space-2;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+
+  &--cash {
+    background: #F0FDF4;
+    color: #16A34A;
+  }
+
+  &--card {
+    background: #EFF6FF;
+    color: #2563EB;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Corte de caja
+// -----------------------------------------------------------------------
+.cutoff-grid {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.cutoff-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-2 0;
+  border-bottom: 1px solid $color-border-soft;
+
+  &:last-child { border-bottom: none; }
+
+  &__label {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+  }
+
+  &__amount {
+    font-size: $font-size-base;
+    font-weight: 700;
+    color: $color-text-title;
+
+    &--total {
+      font-size: 18px;
+      color: $color-primary;
+    }
+  }
+
+  &--total {
+    border-top: 2px solid $color-border-soft;
+    border-bottom: none;
+    padding-top: $space-3;
+    margin-top: $space-1;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Top 5 productos
+// -----------------------------------------------------------------------
+.top-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.top-item {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-2 $space-3;
+  border-radius: 8px;
+  background: #F9FAFB;
+
+  &--first {
+    background: $color-primary-light;
+    .top-item__rank { background: $color-primary; color: white; }
+    .top-item__name { color: $color-primary; font-weight: 700; }
+  }
+
+  &__rank {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #E5E7EB;
+    color: $color-text-sub;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    flex: 1;
+    font-size: $font-size-base;
+    color: $color-text-title;
+  }
+
+  &__count {
+    font-size: $font-size-label;
+    color: $color-text-sub;
+    font-weight: 600;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Orders table
+// -----------------------------------------------------------------------
+.orders-table-wrap {
+  overflow-x: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-base;
+
+  th {
+    padding: $space-2 $space-3;
+    text-align: left;
+    font-size: $font-size-label;
+    font-weight: 600;
+    color: $color-text-sub;
+    border-bottom: 1px solid $color-border-soft;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: $space-3;
+    border-bottom: 1px solid $color-border-soft;
+    color: $color-text-title;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  &__num    { font-weight: 700; color: $color-text-sub; }
+  &__items  { color: $color-text-sub; }
+  &__time   { color: $color-text-sub; font-size: $font-size-label; }
+  &__total  { font-weight: 700; text-align: right; }
+}

@@ -1,0 +1,53 @@
+<header class="pos-header">
+
+  <!-- Brand: logo + business name + location -->
+  <div class="pos-header__brand">
+    <div class="pos-header__logo" aria-hidden="true">
+      <i class="pi pi-home"></i>
+    </div>
+    <div class="pos-header__info">
+      <span class="pos-header__name">{{ config().businessName }}</span>
+      <span class="pos-header__location">{{ config().locationName }}</span>
+    </div>
+  </div>
+
+  <!-- Right side: order number + connection status + settings -->
+  <div class="pos-header__right">
+    @if (deviceConfig().mode === 'counter' || deviceConfig().mode === 'cashier') {
+      <span class="pos-header__order-num">#{{ nextOrderNumber() }}</span>
+    }
+
+    <div
+      class="pos-header__status"
+      [class.pos-header__status--online]="isOnline()"
+      [class.pos-header__status--offline]="!isOnline()"
+      [attr.aria-label]="isOnline() ? 'Conectado' : 'Sin conexión'"
+    >
+      <span class="pos-header__status-dot"></span>
+      <span class="pos-header__status-label">{{ isOnline() ? 'En línea' : 'Sin conexión' }}</span>
+    </div>
+
+    <button
+      type="button"
+      class="pos-header__settings"
+      aria-label="Acceder al back office"
+      (click)="openAdmin()"
+    >
+      <i class="pi pi-cog"></i>
+    </button>
+  </div>
+
+</header>
+
+<!-- Kiosk mode warning banner -->
+@if (deviceConfig().mode === 'kiosk') {
+  <div class="pos-header__kiosk-banner" role="alert">
+    <i class="pi pi-exclamation-triangle"></i>
+    <span>
+      Este dispositivo está configurado como <strong>Kiosko</strong>.
+    </span>
+    <a routerLink="/kiosk/welcome" class="pos-header__kiosk-link">
+      Ir al kiosko →
+    </a>
+  </div>
+}
