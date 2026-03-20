@@ -27,7 +27,7 @@ export const appRoutes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['Kitchen', 'Owner'] },
     loadChildren: () =>
-      import('./modules/pos/pos.routes').then(m => m.posRoutes), // placeholder until kitchen module exists
+      import('./modules/kitchen/kitchen.routes').then(m => m.kitchenRoutes),
   },
   {
     path: 'pin',

@@ -1,0 +1,56 @@
+<div
+  class="kds-card"
+  [class.kds-card--fading]="isFading"
+  [class.kds-card--overdue]="isOverdue"
+>
+  <!-- Card header: order number + timer -->
+  <div class="kds-card__header">
+    <span class="kds-card__number">#{{ order.orderNumber }}</span>
+    <span class="kds-card__timer" [class.kds-card__timer--red]="isOverdue">
+      @if (isOverdue) {
+        <i class="pi pi-exclamation-triangle"></i>
+      }
+      {{ elapsedFormatted }}
+    </span>
+  </div>
+
+  <!-- Items list -->
+  <ul class="kds-card__items">
+    @for (item of order.items; track item.id) {
+      <li class="kds-card__item">
+        <span class="kds-card__qty">{{ item.quantity }}x</span>
+        <span class="kds-card__name">{{ item.product.name }}</span>
+        @if (item.size) {
+          <span class="kds-card__meta">{{ item.size.label }}</span>
+        }
+        @if (item.extras.length > 0) {
+          <span class="kds-card__meta">+ {{ item.extras.length }} extras</span>
+        }
+      </li>
+      @if (item.notes) {
+        <li class="kds-card__note">
+          <i class="pi pi-comment"></i>
+          {{ item.notes }}
+        </li>
+      }
+    }
+  </ul>
+
+  <!-- Done button -->
+  @if (!isFading) {
+    <button
+      type="button"
+      class="kds-card__done"
+      (click)="onDone()"
+    >
+      <i class="pi pi-check"></i>
+      <span>Listo</span>
+    </button>
+  } @else {
+    <div class="kds-card__done-label">
+      <i class="pi pi-check-circle"></i>
+      <span>Completada</span>
+    </div>
+  }
+
+</div>

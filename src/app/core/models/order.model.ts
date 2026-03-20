@@ -6,6 +6,9 @@ export type PaymentMethod = 'cash' | 'card';
 /** Lifecycle state of an order relative to backend sync */
 export type OrderSyncStatus = 'pending' | 'synced' | 'failed';
 
+/** Kitchen display status — undefined on legacy orders treated as 'new' */
+export type KitchenStatus = 'new' | 'done';
+
 /**
  * Payment terminal providers — prepared for future integration.
  * null means the order was processed without an external terminal.
@@ -42,4 +45,6 @@ export interface Order {
   syncedAt?: Date;
   syncStatus: OrderSyncStatus;
   businessId: number;
+  /** Kitchen display status — undefined on legacy orders treated as 'new' */
+  kitchenStatus?: KitchenStatus;
 }

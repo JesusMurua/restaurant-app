@@ -11,6 +11,7 @@ import { AppConfig, Category, CartItem, Order, Product } from '../models';
  * Version history:
  *   v1 — products, categories, cart, orders
  *   v2 — added config (business settings + PIN)
+ *   v3 — added kitchenStatus index to orders (KDS)
  */
 @Injectable({ providedIn: 'root' })
 export class DatabaseService extends Dexie {
@@ -40,6 +41,14 @@ export class DatabaseService extends Dexie {
       categories: 'id, sortOrder',
       cart:       'id',
       orders:     'id, syncStatus, createdAt',
+      config:     'id',
+    });
+
+    this.version(3).stores({
+      products:   'id, categoryId, isAvailable',
+      categories: 'id, sortOrder',
+      cart:       'id',
+      orders:     'id, syncStatus, createdAt, kitchenStatus',
       config:     'id',
     });
   }
