@@ -5,7 +5,7 @@ import { Observable, timeout, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 /** Default request timeout in milliseconds — treat as offline after this */
-const REQUEST_TIMEOUT_MS = 5000;
+const REQUEST_TIMEOUT_MS = 10_000;
 
 /**
  * Centralized HTTP wrapper around Angular HttpClient.

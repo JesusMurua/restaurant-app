@@ -5,6 +5,9 @@ import { Order } from '../models';
 import { ApiService } from './api.service';
 import { DatabaseService } from './database.service';
 
+/** Branch ID — hardcoded until multi-branch support is implemented */
+const BRANCH_ID = 1;
+
 /** Polling interval for pending order sync (milliseconds) */
 const SYNC_POLL_INTERVAL_MS = 30_000;
 
@@ -94,13 +97,15 @@ export class SyncService implements OnDestroy {
 
   /**
    * Attempts to POST a single order to the backend API.
+   * Maps the Dexie Order to the DTO the API expects, wrapped in an array.
    * Updates IndexedDB with the result regardless of outcome.
    * @param order The pending order to sync
    */
   private async syncOrder(order: Order): Promise<void> {
     try {
+      const dto = this.mapOrderToDto(order);
       await firstValueFrom(
-        this.api.post<void>('/orders/sync', order),
+        this.api.post<void>('/orders/sync', [dto]),
       );
       await this.db.orders.update(order.id, {
         syncStatus: 'synced',
@@ -110,6 +115,32 @@ export class SyncService implements OnDestroy {
       console.error(`[SyncService] Failed to sync order ${order.id}:`, error);
       await this.db.orders.update(order.id, { syncStatus: 'failed' });
     }
+  }
+
+  /**
+   * Maps a Dexie Order + CartItems into the flat DTO the API expects.
+   * Flattens nested product/size/extras into plain fields.
+   */
+  private mapOrderToDto(order: Order): Record<string, unknown> {
+    return {
+      id: order.id,
+      branchId: BRANCH_ID,
+      orderNumber: order.orderNumber,
+      totalCents: order.totalCents,
+      paymentMethod: order.paymentMethod === 'cash' ? 'Cash' : 'Card',
+      tenderedCents: order.tenderedCents ?? null,
+      changeCents: order.tenderedCents ? order.tenderedCents - order.totalCents : null,
+      createdAt: order.createdAt,
+      items: order.items.map(item => ({
+        productId: item.product.id,
+        productName: item.product.name,
+        quantity: item.quantity,
+        unitPriceCents: item.unitPriceCents,
+        sizeName: item.size?.label ?? null,
+        extrasJson: item.extras.length > 0 ? JSON.stringify(item.extras) : null,
+        notes: item.notes ?? null,
+      })),
+    };
   }
 
   /**

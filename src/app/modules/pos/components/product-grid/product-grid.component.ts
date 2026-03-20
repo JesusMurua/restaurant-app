@@ -43,7 +43,7 @@ export class ProductGridComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     await this.productService.loadCatalog();
 
-    // Seed local DB if empty (no backend available yet)
+    // Fallback: seed fixtures only if both API and Dexie returned empty
     if (this.productService.products().length === 0) {
       await this.productService.seedCatalog(SEED_PRODUCTS, SEED_CATEGORIES);
     }

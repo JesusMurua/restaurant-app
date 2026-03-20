@@ -68,7 +68,7 @@ export class ProductService {
   async loadCatalog(): Promise<void> {
     this.isLoading.set(true);
 
-    // Step 1 — Serve stale data from Dexie (instant)
+    // Step 1 — Serve stale data from Dexie (instant UI)
     try {
       const [localProducts, allCategories] = await Promise.all([
         this.db.products.toArray(),
@@ -78,12 +78,12 @@ export class ProductService {
       this._categories.set(allCategories.filter(c => c.isActive));
     } catch (error) {
       console.error('[ProductService] Failed to load catalog from IndexedDB:', error);
-    } finally {
-      this.isLoading.set(false);
     }
 
-    // Step 2 — Revalidate from API in background
-    this.revalidateFromApi();
+    // Step 2 — Try API (awaited so callers know when done)
+    await this.revalidateFromApi();
+
+    this.isLoading.set(false);
   }
 
   /**
