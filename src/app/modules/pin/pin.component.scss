@@ -179,6 +179,19 @@
 }
 
 // -----------------------------------------------------------------------
+// Owner login link
+// -----------------------------------------------------------------------
+.pin-owner-link {
+  font-size: $font-size-label;
+  color: $color-text-sub;
+  text-decoration: none;
+  transition: color 0.15s;
+
+  &:hover { color: $color-primary; }
+  &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+}
+
+// -----------------------------------------------------------------------
 // Shake animation for wrong PIN
 // -----------------------------------------------------------------------
 @keyframes shake {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, timeout, catchError, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
@@ -11,9 +11,8 @@ const REQUEST_TIMEOUT_MS = 10_000;
  * Centralized HTTP wrapper around Angular HttpClient.
  *
  * - Base URL from environment.apiUrl
- * - 5-second timeout on every request (RxJS timeout operator)
- * - JSON Content-Type by default
- * - Prepared for JWT auth (reads token from localStorage when available)
+ * - 10-second timeout on every request (RxJS timeout operator)
+ * - Auth headers are handled by authInterceptor — not here
  */
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -34,7 +33,7 @@ export class ApiService {
    */
   get<T>(path: string): Observable<T> {
     return this.http
-      .get<T>(`${this.baseUrl}${path}`, { headers: this.buildHeaders() })
+      .get<T>(`${this.baseUrl}${path}`)
       .pipe(
         timeout(REQUEST_TIMEOUT_MS),
         catchError(error => this.handleError(error)),
@@ -48,7 +47,7 @@ export class ApiService {
    */
   post<T>(path: string, body: unknown): Observable<T> {
     return this.http
-      .post<T>(`${this.baseUrl}${path}`, body, { headers: this.buildHeaders() })
+      .post<T>(`${this.baseUrl}${path}`, body)
       .pipe(
         timeout(REQUEST_TIMEOUT_MS),
         catchError(error => this.handleError(error)),
@@ -62,7 +61,7 @@ export class ApiService {
    */
   put<T>(path: string, body: unknown): Observable<T> {
     return this.http
-      .put<T>(`${this.baseUrl}${path}`, body, { headers: this.buildHeaders() })
+      .put<T>(`${this.baseUrl}${path}`, body)
       .pipe(
         timeout(REQUEST_TIMEOUT_MS),
         catchError(error => this.handleError(error)),
@@ -75,7 +74,7 @@ export class ApiService {
    */
   delete<T>(path: string): Observable<T> {
     return this.http
-      .delete<T>(`${this.baseUrl}${path}`, { headers: this.buildHeaders() })
+      .delete<T>(`${this.baseUrl}${path}`)
       .pipe(
         timeout(REQUEST_TIMEOUT_MS),
         catchError(error => this.handleError(error)),
@@ -85,21 +84,6 @@ export class ApiService {
   //#endregion
 
   //#region Private Helpers
-
-  /**
-   * Builds default headers for every request.
-   * Attaches JWT Bearer token when available in localStorage.
-   */
-  private buildHeaders(): HttpHeaders {
-    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    return headers;
-  }
 
   /**
    * Centralizes error logging. Re-throws so callers can handle fallbacks.

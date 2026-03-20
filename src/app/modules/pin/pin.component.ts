@@ -1,7 +1,10 @@
 import { Component, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
-import { AdminAuthService } from '../../core/services/admin-auth.service';
+import { AuthService } from '../../core/services/auth.service';
+
+/** Branch ID — hardcoded until multi-branch support is implemented */
+const BRANCH_ID = 1;
 
 /** Keys available on the PIN numpad */
 type NumpadKey = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'del';
@@ -9,7 +12,7 @@ type NumpadKey = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'de
 @Component({
   selector: 'app-pin',
   standalone: true,
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './pin.component.html',
   styleUrl: './pin.component.scss',
 })
@@ -23,7 +26,10 @@ export class PinComponent {
   /** True while showing the shake + error state */
   readonly hasError = signal(false);
 
-  /** Flat key list for the 3×4 grid (last row: empty slot, 0, del) */
+  /** True while waiting for API response */
+  readonly isLoading = signal(false);
+
+  /** Flat key list for the 3x4 grid (last row: empty slot, 0, del) */
   readonly keys: (NumpadKey | null)[] = [
     '1', '2', '3',
     '4', '5', '6',
@@ -35,9 +41,8 @@ export class PinComponent {
 
   //#region Constructor
   constructor(
-    private readonly authService: AdminAuthService,
+    private readonly authService: AuthService,
     private readonly router: Router,
-    private readonly route: ActivatedRoute,
   ) {}
   //#endregion
 
@@ -45,7 +50,7 @@ export class PinComponent {
 
   /** Adds a digit if fewer than 4 have been entered, then auto-submits at 4 */
   addDigit(digit: string): void {
-    if (this.digits().length >= 4) return;
+    if (this.digits().length >= 4 || this.isLoading()) return;
     this.digits.update(d => [...d, digit]);
 
     if (this.digits().length === 4) {
@@ -73,14 +78,28 @@ export class PinComponent {
 
   //#region Auth
 
-  /** Verifies the entered PIN and navigates to returnTo or /admin */
+  /** Verifies the entered PIN via API and redirects by role */
   async submit(): Promise<void> {
     const pin = this.digits().join('');
-    const success = await this.authService.login(pin);
+    this.isLoading.set(true);
 
-    if (success) {
-      const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
-      this.router.navigateByUrl(returnTo ?? '/admin');
+    const user = await this.authService.pinLogin(BRANCH_ID, pin);
+
+    this.isLoading.set(false);
+
+    if (user) {
+      const returnUrl = this.authService.consumeReturnUrl();
+      if (returnUrl) {
+        this.router.navigateByUrl(returnUrl);
+        return;
+      }
+
+      switch (user.role) {
+        case 'Owner':   this.router.navigate(['/admin']); break;
+        case 'Kitchen':  this.router.navigate(['/kitchen']); break;
+        case 'Cashier':
+        default:         this.router.navigate(['/pos']); break;
+      }
     } else {
       this.hasError.set(true);
       setTimeout(() => {
@@ -88,11 +107,6 @@ export class PinComponent {
         this.hasError.set(false);
       }, 600);
     }
-  }
-
-  /** Returns to the POS without logging in */
-  goToPOS(): void {
-    this.router.navigate(['/pos']);
   }
 
   //#endregion

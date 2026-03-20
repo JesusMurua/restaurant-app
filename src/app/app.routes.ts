@@ -1,17 +1,33 @@
 import { Routes } from '@angular/router';
 
-import { pinGuard } from './core/guards/pin.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: 'pos',
+    redirectTo: 'pin',
     pathMatch: 'full',
   },
   {
     path: 'pos',
+    canActivate: [authGuard],
+    data: { roles: ['Cashier', 'Owner'] },
     loadChildren: () =>
       import('./modules/pos/pos.routes').then(m => m.posRoutes),
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard],
+    data: { roles: ['Owner'] },
+    loadChildren: () =>
+      import('./modules/admin/admin.routes').then(m => m.adminRoutes),
+  },
+  {
+    path: 'kitchen',
+    canActivate: [authGuard],
+    data: { roles: ['Kitchen', 'Owner'] },
+    loadChildren: () =>
+      import('./modules/pos/pos.routes').then(m => m.posRoutes), // placeholder until kitchen module exists
   },
   {
     path: 'pin',
@@ -19,10 +35,9 @@ export const appRoutes: Routes = [
       import('./modules/pin/pin.component').then(m => m.PinComponent),
   },
   {
-    path: 'admin',
-    canActivate: [pinGuard],
-    loadChildren: () =>
-      import('./modules/admin/admin.routes').then(m => m.adminRoutes),
+    path: 'login',
+    loadComponent: () =>
+      import('./modules/login/login.component').then(m => m.LoginComponent),
   },
   {
     path: 'kiosk',
@@ -31,6 +46,6 @@ export const appRoutes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'pos',
+    redirectTo: 'pin',
   },
 ];

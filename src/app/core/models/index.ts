@@ -1,4 +1,4 @@
-export * from './admin-session.model';
+export * from './auth.model';
 export * from './app-config.model';
 export * from './business-config.model';
 export * from './device-config.model';

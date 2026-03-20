@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
-import { AdminAuthService } from '../../core/services/admin-auth.service';
-import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-shell',
@@ -14,14 +13,12 @@ import { Router } from '@angular/router';
 export class AdminShellComponent {
 
   constructor(
-    private readonly authService: AdminAuthService,
-    private readonly router: Router,
+    private readonly authService: AuthService,
   ) {}
 
-  /** Logs out and returns to the POS */
+  /** Logs out and returns to the PIN screen */
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/pos']);
   }
 
 }
