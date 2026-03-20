@@ -7,6 +7,7 @@ import { DividerModule } from 'primeng/divider';
 import { PricePipe } from '../../../../shared/pipes/price.pipe';
 import { CartItem } from '../../../../core/models';
 import { CartService } from '../../../../core/services/cart.service';
+import { SyncService } from '../../../../core/services/sync.service';
 
 @Component({
   selector: 'app-cart-panel',
@@ -21,11 +22,13 @@ export class CartPanelComponent {
   readonly cart$ = this.cartService.cart$;
   readonly totalCents = this.cartService.totalCents;
   readonly itemCount = this.cartService.itemCount;
+  readonly nextOrderNumber = this.syncService.nextOrderNumber;
   //#endregion
 
   //#region Constructor
   constructor(
     private readonly cartService: CartService,
+    private readonly syncService: SyncService,
     private readonly router: Router,
   ) {}
   //#endregion

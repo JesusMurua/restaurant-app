@@ -2,7 +2,7 @@
 
   <!-- Header -->
   <div class="cart-panel__header">
-    <span class="cart-panel__title">Orden</span>
+    <span class="cart-panel__title">Orden #{{ nextOrderNumber() }}</span>
     @if (itemCount() > 0) {
       <span class="cart-panel__badge">{{ itemCount() }}</span>
     }

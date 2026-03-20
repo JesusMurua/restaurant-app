@@ -8,7 +8,6 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { PricePipe } from '../../../../shared/pipes/price.pipe';
 import { CartItem, Order, PaymentMethod } from '../../../../core/models';
 import { CartService } from '../../../../core/services/cart.service';
-import { DatabaseService } from '../../../../core/services/database.service';
 import { PrintService } from '../../../../core/services/print.service';
 import { SyncService } from '../../../../core/services/sync.service';
 
@@ -89,7 +88,6 @@ export class CheckoutComponent implements OnInit {
   //#region Constructor
   constructor(
     private readonly cartService: CartService,
-    private readonly db: DatabaseService,
     private readonly syncService: SyncService,
     private readonly printService: PrintService,
     private readonly router: Router,
@@ -149,7 +147,7 @@ export class CheckoutComponent implements OnInit {
     if (!this.canConfirm()) return;
 
     const method = this.selectedMethod()!;
-    const orderNumber = (await this.db.orders.count()) + 1;
+    const orderNumber = this.syncService.consumeOrderNumber();
 
     const order: Order = {
       id: crypto.randomUUID(),

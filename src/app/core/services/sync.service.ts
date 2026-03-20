@@ -32,6 +32,9 @@ export class SyncService implements OnDestroy {
   /** Number of orders pending sync */
   readonly pendingCount = signal(0);
 
+  /** Next order number — centralized so all components read the same value */
+  readonly nextOrderNumber = signal(0);
+
   private readonly onlineHandler = () => this.syncPendingOrders();
   private pollTimerId: ReturnType<typeof setInterval> | null = null;
   //#endregion
@@ -43,6 +46,7 @@ export class SyncService implements OnDestroy {
   ) {
     window.addEventListener('online', this.onlineHandler);
     this.refreshPendingCount();
+    this.initNextOrderNumber();
     this.startPolling();
   }
 
@@ -53,6 +57,15 @@ export class SyncService implements OnDestroy {
   //#endregion
 
   //#region Sync Methods
+
+  /**
+   * Returns the current nextOrderNumber and increments it for the next call.
+   */
+  consumeOrderNumber(): number {
+    const num = this.nextOrderNumber();
+    this.nextOrderNumber.set(num + 1);
+    return num;
+  }
 
   /**
    * Saves a new order to IndexedDB as pending sync.
@@ -141,6 +154,28 @@ export class SyncService implements OnDestroy {
         notes: item.notes ?? null,
       })),
     };
+  }
+
+  /**
+   * Initializes nextOrderNumber from the higher of local Dexie count
+   * or the API's last order number. Runs once on service creation.
+   */
+  private async initNextOrderNumber(): Promise<void> {
+    const localCount = await this.db.orders.count();
+    let next = localCount + 1;
+
+    try {
+      const result = await firstValueFrom(
+        this.api.get<{ lastOrderNumber: number }>(`/orders/last-number?branchId=${BRANCH_ID}`),
+      );
+      if (result.lastOrderNumber >= next) {
+        next = result.lastOrderNumber + 1;
+      }
+    } catch (error) {
+      console.warn('[SyncService] Could not fetch last order number from API — using local counter:', error);
+    }
+
+    this.nextOrderNumber.set(next);
   }
 
   /**

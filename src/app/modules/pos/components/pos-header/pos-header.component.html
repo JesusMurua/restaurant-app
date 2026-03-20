@@ -13,10 +13,6 @@
 
   <!-- Right side: order number + connection status + settings -->
   <div class="pos-header__right">
-    @if (deviceConfig().mode === 'counter' || deviceConfig().mode === 'cashier') {
-      <span class="pos-header__order-num">#{{ nextOrderNumber() }}</span>
-    }
-
     <div
       class="pos-header__status"
       [class.pos-header__status--online]="isOnline()"

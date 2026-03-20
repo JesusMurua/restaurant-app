@@ -4,7 +4,6 @@ import { Router, RouterModule } from '@angular/router';
 
 import { AppConfig, DEFAULT_APP_CONFIG, DEFAULT_DEVICE_CONFIG, DeviceConfig } from '../../../../core/models';
 import { ConfigService } from '../../../../core/services/config.service';
-import { DatabaseService } from '../../../../core/services/database.service';
 
 @Component({
   selector: 'app-pos-header',
@@ -19,14 +18,10 @@ export class PosHeaderComponent implements OnInit, OnDestroy {
   readonly config       = signal<AppConfig>({ ...DEFAULT_APP_CONFIG });
   readonly deviceConfig = signal<DeviceConfig>({ ...DEFAULT_DEVICE_CONFIG });
 
-  /** Next order number — computed from IndexedDB count + 1 on each mount */
-  readonly nextOrderNumber = signal(0);
-
   private readonly onOnline  = (): void => this.isOnline.set(true);
   private readonly onOffline = (): void => this.isOnline.set(false);
 
   constructor(
-    private readonly db: DatabaseService,
     private readonly configService: ConfigService,
     private readonly router: Router,
   ) {
@@ -46,12 +41,7 @@ export class PosHeaderComponent implements OnInit, OnDestroy {
     window.addEventListener('online',  this.onOnline);
     window.addEventListener('offline', this.onOffline);
 
-    const [count] = await Promise.all([
-      this.db.orders.count(),
-      this.configService.load(), // triggers config$ emission
-    ]);
-
-    this.nextOrderNumber.set(count + 1);
+    await this.configService.load(); // triggers config$ emission
   }
 
   ngOnDestroy(): void {
