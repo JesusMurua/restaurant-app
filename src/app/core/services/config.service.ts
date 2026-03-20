@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import {
   AppConfig,
@@ -8,13 +9,29 @@ import {
   DEVICE_CONFIG_KEY,
   DeviceConfig,
 } from '../models';
+import { ApiService } from './api.service';
 import { DatabaseService } from './database.service';
+
+/** Branch ID — hardcoded until multi-branch support is implemented */
+const BRANCH_ID = 1;
+
+/**
+ * API response shape for branch config endpoint.
+ * Only the fields we need — the API may return more.
+ */
+interface BranchConfigResponse {
+  businessName: string;
+  locationName: string;
+}
 
 /**
  * Manages two separate layers of configuration:
  *
  * Business config (IndexedDB via Dexie):
  *   Shared across all devices — businessName, locationName, PIN.
+ *   On load(), tries GET /api/branch/1/config first.
+ *   If API succeeds → updates Dexie with fresh data.
+ *   If API fails → uses Dexie local fallback.
  *   Exposed via config$.
  *
  * Device config (localStorage):
@@ -30,26 +47,53 @@ export class ConfigService {
   /** Reactive device config stream — emits on every loadDeviceConfig() and saveDeviceConfig() */
   readonly deviceConfig$ = new BehaviorSubject<DeviceConfig>({ ...DEFAULT_DEVICE_CONFIG });
 
-  constructor(private readonly db: DatabaseService) {
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly api: ApiService,
+  ) {
     // Eagerly load device config so subscribers get the real value immediately
     this.loadDeviceConfig();
   }
 
-  //#region Business config (Dexie)
+  //#region Business config (Dexie + API)
 
   /**
-   * Loads the business config from IndexedDB and emits to config$.
-   * Seeds DEFAULT_APP_CONFIG on first launch.
+   * Loads the business config:
+   *   1. Read from Dexie (instant, may be stale)
+   *   2. Try GET /api/branch/1/config
+   *   3. If API succeeds → merge into local config and persist
+   *   4. If API fails → keep Dexie data as-is
    */
   async load(): Promise<AppConfig> {
+    // Step 1 — Load local config from Dexie
     const stored = await this.db.config.get('main');
-    const config = stored ?? { ...DEFAULT_APP_CONFIG };
+    let config = stored ?? { ...DEFAULT_APP_CONFIG };
 
     if (!stored) {
       await this.db.config.put(DEFAULT_APP_CONFIG);
     }
 
     this.config$.next(config);
+
+    // Step 2 — Try to fetch from API in background
+    try {
+      const remote = await firstValueFrom(
+        this.api.get<BranchConfigResponse>(`/branch/${BRANCH_ID}/config`),
+      );
+
+      config = {
+        ...config,
+        businessName: remote.businessName,
+        locationName: remote.locationName,
+      };
+
+      await this.db.config.put(config);
+      this.config$.next(config);
+      console.info('[ConfigService] Config updated from API');
+    } catch (error) {
+      console.warn('[ConfigService] API unreachable — using local config:', error);
+    }
+
     return config;
   }
 

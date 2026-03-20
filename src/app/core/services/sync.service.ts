@@ -1,27 +1,28 @@
 import { Injectable, OnDestroy, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-import { environment } from '../../../environments/environment';
 import { Order } from '../models';
+import { ApiService } from './api.service';
 import { DatabaseService } from './database.service';
+
+/** Polling interval for pending order sync (milliseconds) */
+const SYNC_POLL_INTERVAL_MS = 30_000;
 
 /**
  * Handles background synchronization of offline orders to the backend API.
  *
  * Flow (CLAUDE.md offline-first architecture):
  *   1. Orders are saved to IndexedDB with syncStatus = 'pending'
- *   2. This service listens for the browser 'online' event
- *   3. When online, it sends all pending orders to the API
- *   4. On success: updates syncedAt and syncStatus = 'synced'
- *   5. On failure: updates syncStatus = 'failed' (retried on next online event)
+ *   2. If online, attempt immediate POST /orders/sync
+ *   3. If offline, queue stays in Dexie
+ *   4. On 'online' event or every 30s (when pending + online) → retry
+ *   5. On success: syncStatus = 'synced', syncedAt = now
+ *   6. On failure: syncStatus = 'failed' (retried next cycle)
  */
 @Injectable({ providedIn: 'root' })
 export class SyncService implements OnDestroy {
 
   //#region Properties
-  private readonly apiUrl = `${environment.apiUrl}/orders`;
-
   /** True while a sync cycle is in progress */
   readonly isSyncing = signal(false);
 
@@ -29,19 +30,22 @@ export class SyncService implements OnDestroy {
   readonly pendingCount = signal(0);
 
   private readonly onlineHandler = () => this.syncPendingOrders();
+  private pollTimerId: ReturnType<typeof setInterval> | null = null;
   //#endregion
 
   //#region Constructor & Lifecycle
   constructor(
     private readonly db: DatabaseService,
-    private readonly http: HttpClient,
+    private readonly api: ApiService,
   ) {
     window.addEventListener('online', this.onlineHandler);
     this.refreshPendingCount();
+    this.startPolling();
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('online', this.onlineHandler);
+    this.stopPolling();
   }
   //#endregion
 
@@ -63,10 +67,10 @@ export class SyncService implements OnDestroy {
 
   /**
    * Fetches all pending orders and attempts to sync them with the API.
-   * Runs automatically when the browser goes online.
+   * Runs automatically when the browser goes online or on polling interval.
    */
   async syncPendingOrders(): Promise<void> {
-    if (this.isSyncing()) return;
+    if (this.isSyncing() || !navigator.onLine) return;
 
     const pending = await this.db.orders
       .where('syncStatus')
@@ -96,7 +100,7 @@ export class SyncService implements OnDestroy {
   private async syncOrder(order: Order): Promise<void> {
     try {
       await firstValueFrom(
-        this.http.post<void>(this.apiUrl, order),
+        this.api.post<void>('/orders/sync', order),
       );
       await this.db.orders.update(order.id, {
         syncStatus: 'synced',
@@ -117,6 +121,26 @@ export class SyncService implements OnDestroy {
       .equals('pending')
       .count();
     this.pendingCount.set(count);
+  }
+
+  /**
+   * Starts a 30-second polling interval.
+   * Only syncs when there are pending orders AND the browser is online.
+   */
+  private startPolling(): void {
+    this.pollTimerId = setInterval(async () => {
+      if (navigator.onLine && this.pendingCount() > 0) {
+        await this.syncPendingOrders();
+      }
+    }, SYNC_POLL_INTERVAL_MS);
+  }
+
+  /** Stops the polling interval */
+  private stopPolling(): void {
+    if (this.pollTimerId !== null) {
+      clearInterval(this.pollTimerId);
+      this.pollTimerId = null;
+    }
   }
   //#endregion
 

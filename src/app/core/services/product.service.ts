@@ -1,12 +1,21 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { firstValueFrom, forkJoin } from 'rxjs';
 
 import { Category, Product } from '../models';
+import { ApiService } from './api.service';
 import { DatabaseService } from './database.service';
+
+/** Branch ID — hardcoded until multi-branch support is implemented */
+const BRANCH_ID = 1;
 
 /**
  * Manages the product catalog state using Angular signals.
- * Products and categories are loaded from IndexedDB (offline-first).
- * When a backend is available, call seedCatalog() after fetching from the API.
+ *
+ * Hybrid "stale-while-revalidate" strategy:
+ *   1. Load immediately from IndexedDB (instant UI)
+ *   2. Fetch from API in background
+ *   3. If API succeeds → update Dexie + signals (UI refreshes)
+ *   4. If API fails → keep Dexie data (offline mode)
  */
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -42,29 +51,39 @@ export class ProductService {
   //#endregion
 
   //#region Constructor
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly api: ApiService,
+  ) {}
   //#endregion
 
   //#region Catalog Methods
 
   /**
-   * Loads the product catalog from IndexedDB into signals.
-   * Call this on app start or when the POS view initializes.
+   * Stale-while-revalidate catalog load:
+   *   1. Serve cached data from IndexedDB immediately
+   *   2. Fetch fresh data from API in background
+   *   3. Update Dexie + signals if API succeeds
    */
   async loadCatalog(): Promise<void> {
     this.isLoading.set(true);
+
+    // Step 1 — Serve stale data from Dexie (instant)
     try {
-      const [products, allCategories] = await Promise.all([
+      const [localProducts, allCategories] = await Promise.all([
         this.db.products.toArray(),
         this.db.categories.orderBy('sortOrder').toArray(),
       ]);
-      this._products.set(products);
+      this._products.set(localProducts);
       this._categories.set(allCategories.filter(c => c.isActive));
     } catch (error) {
       console.error('[ProductService] Failed to load catalog from IndexedDB:', error);
     } finally {
       this.isLoading.set(false);
     }
+
+    // Step 2 — Revalidate from API in background
+    this.revalidateFromApi();
   }
 
   /**
@@ -79,7 +98,7 @@ export class ProductService {
       await this.db.categories.bulkPut(categories);
     });
     this._products.set(products);
-    this._categories.set(categories);
+    this._categories.set(categories.filter(c => c.isActive));
   }
   //#endregion
 
@@ -92,6 +111,28 @@ export class ProductService {
    */
   selectCategory(categoryId: number | null): void {
     this._selectedCategoryId.set(categoryId);
+  }
+  //#endregion
+
+  //#region Private Helpers
+
+  /**
+   * Fetches products and categories from the API and updates local cache.
+   * Runs silently in background — errors are logged but never block the UI.
+   */
+  private async revalidateFromApi(): Promise<void> {
+    try {
+      const [products, categories] = await firstValueFrom(
+        forkJoin([
+          this.api.get<Product[]>(`/products?branchId=${BRANCH_ID}`),
+          this.api.get<Category[]>(`/categories?branchId=${BRANCH_ID}`),
+        ]),
+      );
+      await this.seedCatalog(products, categories);
+      console.info('[ProductService] Catalog updated from API');
+    } catch (error) {
+      console.warn('[ProductService] API unreachable — using cached catalog:', error);
+    }
   }
   //#endregion
 
