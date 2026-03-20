@@ -1,0 +1,99 @@
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using POS.Repository.Utils;
+
+namespace POS.Repository;
+
+/// <summary>
+/// Generic repository implementation using EF Core.
+/// </summary>
+public class GenericRepository<T> : IGenericRepository<T> where T : class
+{
+    protected readonly ApplicationDbContext _context;
+    protected readonly DbSet<T> _dbSet;
+
+    public GenericRepository(ApplicationDbContext context)
+    {
+        _context = context;
+        _dbSet = context.Set<T>();
+    }
+
+    #region Public CRUD Methods
+
+    public async Task<T?> GetByIdAsync(int id)
+    {
+        return await _dbSet.FindAsync(id);
+    }
+
+    public async Task<IEnumerable<T>> GetAllAsync()
+    {
+        return await _dbSet.ToListAsync();
+    }
+
+    public async Task<T> AddAsync(T entity)
+    {
+        await _dbSet.AddAsync(entity);
+        return entity;
+    }
+
+    public void Update(T entity)
+    {
+        _dbSet.Update(entity);
+    }
+
+    public void Delete(T entity)
+    {
+        _dbSet.Remove(entity);
+    }
+
+    public async Task<IEnumerable<T>> GetAsync(
+        Expression<Func<T, bool>>? filter = null,
+        string? includeProperties = null)
+    {
+        IQueryable<T> query = _dbSet;
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        if (!string.IsNullOrWhiteSpace(includeProperties))
+        {
+            foreach (var property in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(property.Trim());
+            }
+        }
+
+        return await query.ToListAsync();
+    }
+
+    public async Task<PageData<T>> GetListPagedAsync(
+        PageFilter pageFilter,
+        Expression<Func<T, bool>>? filter = null)
+    {
+        IQueryable<T> query = _dbSet;
+
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((pageFilter.Page - 1) * pageFilter.PageSize)
+            .Take(pageFilter.PageSize)
+            .ToListAsync();
+
+        return new PageData<T>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = pageFilter.Page,
+            PageSize = pageFilter.PageSize,
+        };
+    }
+
+    #endregion
+}
