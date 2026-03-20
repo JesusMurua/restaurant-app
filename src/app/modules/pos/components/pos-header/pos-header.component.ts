@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 
 import { AppConfig, DEFAULT_APP_CONFIG, DEFAULT_DEVICE_CONFIG, DeviceConfig } from '../../../../core/models';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ConfigService } from '../../../../core/services/config.service';
 
 @Component({
@@ -18,13 +19,19 @@ export class PosHeaderComponent implements OnInit, OnDestroy {
   readonly config       = signal<AppConfig>({ ...DEFAULT_APP_CONFIG });
   readonly deviceConfig = signal<DeviceConfig>({ ...DEFAULT_DEVICE_CONFIG });
 
+  /** Show orders button only for Cashier and Owner */
+  readonly showOrdersButton: boolean;
+
   private readonly onOnline  = (): void => this.isOnline.set(true);
   private readonly onOffline = (): void => this.isOnline.set(false);
 
   constructor(
     private readonly configService: ConfigService,
+    private readonly authService: AuthService,
     private readonly router: Router,
   ) {
+    const role = this.authService.currentUser()?.role;
+    this.showOrdersButton = role === 'Cashier' || role === 'Owner';
     // Business config — reactive
     this.configService.config$
       .pipe(takeUntilDestroyed())
@@ -47,6 +54,11 @@ export class PosHeaderComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     window.removeEventListener('online',  this.onOnline);
     window.removeEventListener('offline', this.onOffline);
+  }
+
+  /** Navigates to the orders list */
+  openOrders(): void {
+    this.router.navigate(['/orders']);
   }
 
   /** Navigates to the PIN screen to access the back office */

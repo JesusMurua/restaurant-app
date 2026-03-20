@@ -9,6 +9,9 @@ export type OrderSyncStatus = 'pending' | 'synced' | 'failed';
 /** Kitchen display status — undefined on legacy orders treated as 'new' */
 export type KitchenStatus = 'new' | 'done';
 
+/** Delivery status — undefined means not yet delivered */
+export type DeliveryStatus = 'delivered';
+
 /**
  * Payment terminal providers — prepared for future integration.
  * null means the order was processed without an external terminal.
@@ -47,4 +50,6 @@ export interface Order {
   businessId: number;
   /** Kitchen display status — undefined on legacy orders treated as 'new' */
   kitchenStatus?: KitchenStatus;
+  /** Delivery status — undefined means not yet delivered */
+  deliveryStatus?: DeliveryStatus;
 }

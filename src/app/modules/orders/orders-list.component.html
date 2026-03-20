@@ -1,0 +1,57 @@
+<div class="orders-page">
+
+  <!-- Header -->
+  <header class="orders-header">
+    <div class="orders-header__left">
+      <button type="button" class="orders-header__back" (click)="goBack()" aria-label="Volver al POS">
+        <i class="pi pi-arrow-left"></i>
+      </button>
+      <h1 class="orders-header__title">Órdenes activas</h1>
+    </div>
+
+    <!-- Search -->
+    <div class="orders-header__search">
+      <i class="pi pi-search"></i>
+      <input
+        type="text"
+        placeholder="Buscar #orden"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearch($event)"
+      />
+    </div>
+  </header>
+
+  <!-- Filter tabs -->
+  <nav class="orders-filters" aria-label="Filtrar por estado">
+    @for (f of filters; track f.key) {
+      <button
+        type="button"
+        class="orders-filter"
+        [class.orders-filter--active]="activeFilter() === f.key"
+        (click)="setFilter(f.key)"
+      >
+        {{ f.label }}
+      </button>
+    }
+  </nav>
+
+  <!-- Order list -->
+  <div class="orders-list">
+    @for (order of filteredOrders(); track order.id) {
+      <app-order-row
+        [order]="order"
+        [now]="now()"
+        [status]="getStatus(order)"
+        [canDeliver]="canDeliver"
+        [isDelivered]="isDelivered(order)"
+        (markDelivered)="onMarkDelivered($event)"
+      />
+    } @empty {
+      <div class="orders-empty">
+        <i class="pi pi-inbox"></i>
+        <p>No hay órdenes para este filtro</p>
+      </div>
+    }
+  </div>
+
+</div>

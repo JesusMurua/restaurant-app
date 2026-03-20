@@ -157,3 +157,70 @@ textarea.p-inputtextarea:enabled:focus {
 .pos-price--total {
   color: $color-price-total;
 }
+
+// -----------------------------------------------------------------------------
+// Print styles — Kitchen comanda (80mm thermal printer)
+// -----------------------------------------------------------------------------
+@media print {
+  // Hide everything except the comanda area
+  body > *:not(#print-comanda-area) {
+    display: none !important;
+  }
+
+  #print-comanda-area {
+    display: block !important;
+  }
+
+  @page {
+    size: 80mm auto;
+    margin: 2mm;
+  }
+
+  .print-comanda {
+    width: 72mm;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    color: #000;
+    line-height: 1.4;
+
+    &__separator {
+      text-align: center;
+      letter-spacing: -1px;
+    }
+
+    &__title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    &__order {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    &__time {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    &__item {
+      font-size: 15px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    &__meta {
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    &__notes {
+      font-size: 13px;
+      font-weight: 700;
+    }
+  }
+}

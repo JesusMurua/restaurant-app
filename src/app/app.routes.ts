@@ -30,6 +30,13 @@ export const appRoutes: Routes = [
       import('./modules/kitchen/kitchen.routes').then(m => m.kitchenRoutes),
   },
   {
+    path: 'orders',
+    canActivate: [authGuard],
+    data: { roles: ['Cashier', 'Kitchen', 'Owner'] },
+    loadChildren: () =>
+      import('./modules/orders/orders.routes').then(m => m.ordersRoutes),
+  },
+  {
     path: 'pin',
     loadComponent: () =>
       import('./modules/pin/pin.component').then(m => m.PinComponent),

@@ -23,6 +23,17 @@
       <span class="pos-header__status-label">{{ isOnline() ? 'En línea' : 'Sin conexión' }}</span>
     </div>
 
+    @if (showOrdersButton) {
+      <button
+        type="button"
+        class="pos-header__settings"
+        aria-label="Ver órdenes activas"
+        (click)="openOrders()"
+      >
+        <i class="pi pi-receipt"></i>
+      </button>
+    }
+
     <button
       type="button"
       class="pos-header__settings"

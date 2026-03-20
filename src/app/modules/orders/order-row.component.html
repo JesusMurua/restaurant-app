@@ -1,0 +1,69 @@
+<div class="order-row" [class.order-row--delivered]="isDelivered">
+
+  <!-- Summary row (always visible) -->
+  <button type="button" class="order-row__summary" (click)="toggle()">
+    <span class="order-row__number">#{{ order.orderNumber }}</span>
+    <span class="order-row__time">{{ order.createdAt | date:'HH:mm' }}</span>
+    <span
+      class="order-row__badge"
+      [style.color]="status.color"
+      [style.background]="status.bgColor"
+    >
+      {{ status.label }}
+    </span>
+    <span class="order-row__elapsed" [class.order-row__elapsed--red]="isOverdue">
+      @if (isOverdue) {
+        <i class="pi pi-exclamation-triangle"></i>
+      }
+      {{ elapsedFormatted }}
+    </span>
+    <span class="order-row__total">{{ order.totalCents | price }}</span>
+    <span class="order-row__payment">{{ order.paymentMethod === 'cash' ? 'Efectivo' : 'Tarjeta' }}</span>
+    <i class="pi order-row__chevron" [class.pi-chevron-down]="!expanded()" [class.pi-chevron-up]="expanded()"></i>
+  </button>
+
+  <!-- Expanded detail -->
+  @if (expanded()) {
+    <div class="order-row__detail">
+
+      <!-- Items -->
+      <ul class="order-row__items">
+        @for (item of order.items; track item.id) {
+          <li class="order-row__item">
+            <span class="order-row__item-qty">{{ item.quantity }}x</span>
+            <span class="order-row__item-name">{{ item.product.name }}</span>
+            @if (item.size) {
+              <span class="order-row__item-meta">({{ item.size.label }})</span>
+            }
+            @if (item.extras.length > 0) {
+              <span class="order-row__item-meta">+ {{ getExtraLabels(item) }}</span>
+            }
+            <span class="order-row__item-price">{{ item.totalPriceCents | price }}</span>
+          </li>
+          @if (item.notes) {
+            <li class="order-row__note">
+              <i class="pi pi-comment"></i>
+              {{ item.notes }}
+            </li>
+          }
+        }
+      </ul>
+
+      <!-- Actions -->
+      <div class="order-row__actions">
+        <button type="button" class="order-row__action order-row__action--print" (click)="onPrint()">
+          <i class="pi pi-print"></i>
+          <span>Imprimir comanda</span>
+        </button>
+        @if (canDeliver && !isDelivered) {
+          <button type="button" class="order-row__action order-row__action--deliver" (click)="onDeliver()">
+            <i class="pi pi-check"></i>
+            <span>Marcar entregada</span>
+          </button>
+        }
+      </div>
+
+    </div>
+  }
+
+</div>
