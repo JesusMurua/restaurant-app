@@ -43,8 +43,11 @@
         [now]="now()"
         [status]="getStatus(order)"
         [canDeliver]="canDeliver"
+        [canCancel]="canDeliver && canCancel(order)"
         [isDelivered]="isDelivered(order)"
+        [isCancelled]="order.cancellationStatus === 'cancelled'"
         (markDelivered)="onMarkDelivered($event)"
+        (cancelOrder)="openCancelDialog(order)"
       />
     } @empty {
       <div class="orders-empty">
@@ -55,3 +58,63 @@
   </div>
 
 </div>
+
+<!-- Cancel Order Dialog -->
+<p-dialog
+  [header]="'Cancelar Orden #' + cancellingOrder()?.orderNumber"
+  [(visible)]="showCancelDialog"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '420px' }"
+  [draggable]="false"
+>
+  <div class="cancel-dialog">
+
+    <p class="cancel-dialog__label">Motivo de cancelación:</p>
+
+    <div class="cancel-dialog__reasons">
+      @for (reason of cancellationReasons; track reason) {
+        <div class="cancel-dialog__reason">
+          <p-radioButton
+            [name]="'cancelReason'"
+            [value]="reason"
+            [ngModel]="selectedReason()"
+            (ngModelChange)="selectedReason.set($event)"
+            [inputId]="'reason-' + $index"
+          />
+          <label [for]="'reason-' + $index">{{ reason }}</label>
+        </div>
+      }
+    </div>
+
+    <textarea
+      pInputTextarea
+      [ngModel]="cancelNotes()"
+      (ngModelChange)="cancelNotes.set($event)"
+      placeholder="Nota adicional..."
+      [rows]="3"
+      class="cancel-dialog__notes"
+    ></textarea>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="cancel-dialog__footer">
+      <button
+        type="button"
+        class="cancel-dialog__btn cancel-dialog__btn--secondary"
+        (click)="showCancelDialog.set(false)"
+      >
+        Regresar
+      </button>
+      <button
+        type="button"
+        class="cancel-dialog__btn cancel-dialog__btn--danger"
+        [disabled]="!selectedReason()"
+        (click)="confirmCancel()"
+      >
+        Cancelar orden
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

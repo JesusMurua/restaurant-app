@@ -12,6 +12,9 @@ export type KitchenStatus = 'new' | 'done';
 /** Delivery status — undefined means not yet delivered */
 export type DeliveryStatus = 'delivered';
 
+/** Cancellation status */
+export type CancellationStatus = 'none' | 'cancelled';
+
 /**
  * Payment terminal providers — prepared for future integration.
  * null means the order was processed without an external terminal.
@@ -52,4 +55,10 @@ export interface Order {
   kitchenStatus?: KitchenStatus;
   /** Delivery status — undefined means not yet delivered */
   deliveryStatus?: DeliveryStatus;
+  /** Cancellation status — defaults to 'none' */
+  cancellationStatus?: CancellationStatus;
+  /** Reason selected when cancelling */
+  cancellationReason?: string;
+  /** Timestamp when the order was cancelled */
+  cancelledAt?: Date;
 }

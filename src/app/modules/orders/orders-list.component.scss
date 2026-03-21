@@ -148,6 +148,81 @@
 }
 
 // -----------------------------------------------------------------------
+// Cancel Dialog
+// -----------------------------------------------------------------------
+.cancel-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+
+  &__label {
+    margin: 0;
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: $color-text-title;
+  }
+
+  &__reasons {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+  }
+
+  &__reason {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+
+    label {
+      font-size: $font-size-base;
+      color: $color-text-title;
+      cursor: pointer;
+    }
+  }
+
+  &__notes {
+    width: 100%;
+    font-size: $font-size-base;
+    font-family: inherit;
+    resize: vertical;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-3;
+  }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $space-2 $space-5;
+    min-height: 44px;
+    border: none;
+    border-radius: 10px;
+    font-size: $font-size-base;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &--secondary {
+      background: $color-bg-page;
+      color: $color-text-sub;
+      &:hover { background: #E5E7EB; }
+    }
+
+    &--danger {
+      background: #DC2626;
+      color: white;
+      &:hover { background: #B91C1C; }
+      &:disabled { background: #D1D5DB; cursor: not-allowed; }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------
 // Print styles
 // -----------------------------------------------------------------------
 @media print {

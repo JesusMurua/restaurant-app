@@ -15,6 +15,10 @@
   &--delivered {
     opacity: 0.6;
   }
+
+  &--cancelled {
+    opacity: 0.6;
+  }
 }
 
 // -----------------------------------------------------------------------
@@ -190,6 +194,18 @@
     color: white;
     &:hover { background: #15803D; }
   }
+
+  &--cancel {
+    background: rgba(#DC2626, 0.08);
+    color: #DC2626;
+    &:hover { background: rgba(#DC2626, 0.16); }
+  }
+}
+
+.order-row__cancel-reason {
+  font-size: $font-size-label;
+  color: #9CA3AF;
+  font-style: italic;
 }
 
 // -----------------------------------------------------------------------

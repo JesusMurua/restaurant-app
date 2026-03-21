@@ -1,4 +1,4 @@
-<div class="order-row" [class.order-row--delivered]="isDelivered">
+<div class="order-row" [class.order-row--delivered]="isDelivered" [class.order-row--cancelled]="isCancelled">
 
   <!-- Summary row (always visible) -->
   <button type="button" class="order-row__summary" (click)="toggle()">
@@ -11,6 +11,9 @@
     >
       {{ status.label }}
     </span>
+    @if (isCancelled && order.cancellationReason) {
+      <span class="order-row__cancel-reason">{{ order.cancellationReason }}</span>
+    }
     <span class="order-row__elapsed" [class.order-row__elapsed--red]="isOverdue">
       @if (isOverdue) {
         <i class="pi pi-exclamation-triangle"></i>
@@ -55,10 +58,16 @@
           <i class="pi pi-print"></i>
           <span>Imprimir comanda</span>
         </button>
-        @if (canDeliver && !isDelivered) {
+        @if (canDeliver && !isDelivered && !isCancelled) {
           <button type="button" class="order-row__action order-row__action--deliver" (click)="onDeliver()">
             <i class="pi pi-check"></i>
             <span>Marcar entregada</span>
+          </button>
+        }
+        @if (canCancel) {
+          <button type="button" class="order-row__action order-row__action--cancel" (click)="onCancel()">
+            <i class="pi pi-times"></i>
+            <span>Cancelar</span>
           </button>
         }
       </div>

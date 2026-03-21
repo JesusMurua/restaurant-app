@@ -69,6 +69,20 @@ export class ApiService {
   }
 
   /**
+   * Performs a PATCH request with timeout.
+   * @param path Relative path appended to baseUrl
+   * @param body Request body
+   */
+  patch<T>(path: string, body: unknown): Observable<T> {
+    return this.http
+      .patch<T>(`${this.baseUrl}${path}`, body)
+      .pipe(
+        timeout(REQUEST_TIMEOUT_MS),
+        catchError(error => this.handleError(error)),
+      );
+  }
+
+  /**
    * Performs a DELETE request with timeout.
    * @param path Relative path appended to baseUrl
    */

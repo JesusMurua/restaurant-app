@@ -1,6 +1,8 @@
 import { Injectable, OnDestroy, signal } from '@angular/core';
+import { catchError, EMPTY } from 'rxjs';
 
 import { Order } from '../models';
+import { ApiService } from './api.service';
 import { DatabaseService } from './database.service';
 
 /** Polling interval for order list refresh (milliseconds) */
@@ -23,6 +25,9 @@ export interface OrderDisplayStatus {
  *   kitchenStatus undefined → Nueva (grey)
  */
 export function getDisplayStatus(order: Order): OrderDisplayStatus {
+  if (order.cancellationStatus === 'cancelled') {
+    return { label: 'Cancelada', color: '#6B7280', bgColor: 'rgba(107, 114, 128, 0.1)' };
+  }
   if (order.deliveryStatus === 'delivered') {
     return { label: 'Entregada', color: '#2563EB', bgColor: 'rgba(37, 99, 235, 0.1)' };
   }
@@ -53,7 +58,10 @@ export class OrdersService implements OnDestroy {
   //#endregion
 
   //#region Constructor & Lifecycle
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly api: ApiService,
+  ) {}
 
   ngOnDestroy(): void {
     this.stopPolling();
@@ -82,6 +90,38 @@ export class OrdersService implements OnDestroy {
     this.todayOrders.update(orders =>
       orders.map(o => o.id === orderId ? { ...o, deliveryStatus: 'delivered' as const } : o),
     );
+  }
+
+  /**
+   * Cancels an order locally in Dexie and queues sync to backend.
+   * @param orderId UUID of the order to cancel
+   * @param reason Selected cancellation reason
+   * @param notes Optional additional notes
+   */
+  async cancelOrder(orderId: string, reason: string, notes?: string): Promise<void> {
+    const now = new Date();
+
+    await this.db.orders.update(orderId, {
+      cancellationStatus: 'cancelled',
+      cancellationReason: reason,
+      cancelledAt: now,
+      syncStatus: 'pending',
+    });
+
+    this.todayOrders.update(orders =>
+      orders.map(o => o.id === orderId
+        ? { ...o, cancellationStatus: 'cancelled' as const, cancellationReason: reason, cancelledAt: now, syncStatus: 'pending' as const }
+        : o,
+      ),
+    );
+
+    // Fire and forget — sync to backend
+    this.api.patch(`/orders/${orderId}/cancel`, { reason, notes }).pipe(
+      catchError(error => {
+        console.error(`[OrdersService] Failed to sync cancellation for ${orderId}:`, error);
+        return EMPTY;
+      }),
+    ).subscribe();
   }
 
   //#endregion

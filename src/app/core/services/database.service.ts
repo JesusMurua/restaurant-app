@@ -13,6 +13,7 @@ import { AppConfig, Category, CartItem, Order, Product } from '../models';
  *   v2 — added config (business settings + PIN)
  *   v3 — added kitchenStatus index to orders (KDS)
  *   v4 — added deliveryStatus index to orders (order tracking)
+ *   v5 — added cancellationStatus index to orders (order cancellation)
  */
 @Injectable({ providedIn: 'root' })
 export class DatabaseService extends Dexie {
@@ -59,6 +60,20 @@ export class DatabaseService extends Dexie {
       cart:       'id',
       orders:     'id, syncStatus, createdAt, kitchenStatus, deliveryStatus',
       config:     'id',
+    });
+
+    this.version(5).stores({
+      products:   'id, categoryId, isAvailable',
+      categories: 'id, sortOrder',
+      cart:       'id',
+      orders:     'id, syncStatus, createdAt, kitchenStatus, deliveryStatus, cancellationStatus',
+      config:     'id',
+    }).upgrade(tx => {
+      return tx.table('orders').toCollection().modify(order => {
+        if (order.cancellationStatus === undefined) {
+          order.cancellationStatus = 'none';
+        }
+      });
     });
   }
   //#endregion

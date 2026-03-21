@@ -19,11 +19,14 @@ export class OrderRowComponent {
   @Input({ required: true }) now!: Date;
   @Input({ required: true }) status!: OrderDisplayStatus;
   @Input() canDeliver = false;
+  @Input() canCancel = false;
   @Input() isDelivered = false;
+  @Input() isCancelled = false;
   //#endregion
 
   //#region Outputs
   @Output() markDelivered = new EventEmitter<string>();
+  @Output() cancelOrder = new EventEmitter<string>();
   //#endregion
 
   //#region State
@@ -54,6 +57,10 @@ export class OrderRowComponent {
 
   onDeliver(): void {
     this.markDelivered.emit(this.order.id);
+  }
+
+  onCancel(): void {
+    this.cancelOrder.emit(this.order.id);
   }
 
   /** Generates a kitchen comanda (no prices) and triggers window.print() */

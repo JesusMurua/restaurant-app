@@ -2,18 +2,22 @@ import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
+import { DialogModule } from 'primeng/dialog';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+
 import { Order } from '../../core/models';
 import { AuthService } from '../../core/services/auth.service';
 import { OrdersService, getDisplayStatus } from '../../core/services/orders.service';
 import { OrderRowComponent } from './order-row.component';
 
 /** Filter tabs for the order list */
-type StatusFilter = 'all' | 'new' | 'cooking' | 'ready' | 'delivered';
+type StatusFilter = 'all' | 'new' | 'cooking' | 'ready' | 'delivered' | 'cancelled';
 
 @Component({
   selector: 'app-orders-list',
   standalone: true,
-  imports: [FormsModule, OrderRowComponent],
+  imports: [FormsModule, OrderRowComponent, DialogModule, RadioButtonModule, InputTextareaModule],
   templateUrl: './orders-list.component.html',
   styleUrl: './orders-list.component.scss',
 })
@@ -27,12 +31,27 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   /** Whether the current user can mark orders as delivered */
   readonly canDeliver: boolean;
 
+  /** Cancel dialog state */
+  readonly showCancelDialog = signal(false);
+  readonly cancellingOrder = signal<Order | null>(null);
+  readonly selectedReason = signal('');
+  readonly cancelNotes = signal('');
+
+  readonly cancellationReasons = [
+    'Error en la orden',
+    'Cliente canceló',
+    'Ingrediente no disponible',
+    'Orden duplicada',
+    'Otro',
+  ];
+
   readonly filters: { key: StatusFilter; label: string }[] = [
     { key: 'all',       label: 'Todas' },
     { key: 'new',       label: 'Nueva' },
     { key: 'cooking',   label: 'En cocina' },
     { key: 'ready',     label: 'Lista' },
     { key: 'delivered', label: 'Entregada' },
+    { key: 'cancelled', label: 'Cancelada' },
   ];
 
   /** Filtered and searched orders */
@@ -101,9 +120,35 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/pos']);
   }
 
+  /** Opens the cancellation dialog for a specific order */
+  openCancelDialog(order: Order): void {
+    this.cancellingOrder.set(order);
+    this.selectedReason.set('');
+    this.cancelNotes.set('');
+    this.showCancelDialog.set(true);
+  }
+
+  /** Confirms cancellation, updates Dexie + API, closes dialog */
+  async confirmCancel(): Promise<void> {
+    const order = this.cancellingOrder();
+    const reason = this.selectedReason();
+    if (!order || !reason) return;
+
+    const notes = this.cancelNotes().trim() || undefined;
+    await this.ordersService.cancelOrder(order.id, reason, notes);
+    this.showCancelDialog.set(false);
+    this.cancellingOrder.set(null);
+  }
+
   //#endregion
 
   //#region Helpers
+
+  /** Returns true if the order can be cancelled */
+  canCancel(order: Order): boolean {
+    return order.deliveryStatus !== 'delivered'
+        && order.cancellationStatus !== 'cancelled';
+  }
 
   getStatus(order: Order) {
     return getDisplayStatus(order);
@@ -119,8 +164,9 @@ export class OrdersListComponent implements OnInit, OnDestroy {
       case 'new':       return status.label === 'Nueva';
       case 'cooking':   return status.label === 'En cocina';
       case 'ready':     return status.label === 'Lista';
-      case 'delivered': return status.label === 'Entregada';
-      default:          return true;
+      case 'delivered':  return status.label === 'Entregada';
+      case 'cancelled':  return status.label === 'Cancelada';
+      default:           return true;
     }
   }
 
