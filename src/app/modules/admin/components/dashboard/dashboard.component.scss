@@ -96,6 +96,8 @@
     font-size: $font-size-base;
     font-weight: 700;
     color: $color-text-title;
+
+    &--danger { color: #DC2626; }
   }
 
   &__empty {
@@ -104,6 +106,19 @@
     color: $color-text-sub;
     text-align: center;
     padding: $space-4 0;
+  }
+
+  &__subtitle {
+    margin: -$space-3 0 $space-3;
+    font-size: $font-size-label;
+    color: $color-text-sub;
+  }
+
+  &__note {
+    margin: $space-3 0 0;
+    font-size: $font-size-label;
+    color: #9CA3AF;
+    font-style: italic;
   }
 }
 
@@ -125,6 +140,31 @@
   &--card {
     background: #EFF6FF;
     color: #2563EB;
+  }
+
+  &--cancelled {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6B7280;
+  }
+
+  &--new {
+    background: #DBEAFE;
+    color: #1D4ED8;
+  }
+
+  &--cooking {
+    background: #FEF3C7;
+    color: #D97706;
+  }
+
+  &--ready {
+    background: #DCFCE7;
+    color: #16A34A;
+  }
+
+  &--delivered {
+    background: #F3F4F6;
+    color: #6B7280;
   }
 }
 
@@ -168,6 +208,57 @@
     border-bottom: none;
     padding-top: $space-3;
     margin-top: $space-1;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Cancellations
+// -----------------------------------------------------------------------
+.cancellation-grid {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.cancellation-row {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-2 0;
+  border-bottom: 1px solid $color-border-soft;
+
+  &:last-child { border-bottom: none; }
+
+  &__reason {
+    flex: 1;
+    font-size: $font-size-base;
+    color: $color-text-title;
+  }
+
+  &__count {
+    font-size: $font-size-label;
+    color: $color-text-sub;
+    min-width: 72px;
+    text-align: right;
+  }
+
+  &__amount {
+    font-size: $font-size-base;
+    font-weight: 700;
+    color: $color-text-title;
+    min-width: 80px;
+    text-align: right;
+
+    &--danger { color: #DC2626; }
+  }
+
+  &--total {
+    border-top: 2px solid $color-border-soft;
+    border-bottom: none;
+    padding-top: $space-3;
+    margin-top: $space-1;
+
+    .cancellation-row__reason { font-weight: 700; }
   }
 }
 
@@ -259,4 +350,33 @@
   &__items  { color: $color-text-sub; }
   &__time   { color: $color-text-sub; font-size: $font-size-label; }
   &__total  { font-weight: 700; text-align: right; }
+
+  &__row--cancelled {
+    opacity: 0.6;
+  }
+
+  &__cancel-reason {
+    display: block;
+    font-size: 11px;
+    color: #9CA3AF;
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  &__cancel-reason-cell {
+    font-size: $font-size-label;
+    color: $color-text-sub;
+    font-style: italic;
+  }
+
+  &__total-row td {
+    border-top: 2px solid $color-border-soft;
+    border-bottom: none;
+    padding-top: $space-3;
+    color: $color-text-title;
+  }
+
+  &__total--danger {
+    color: #DC2626 !important;
+  }
 }

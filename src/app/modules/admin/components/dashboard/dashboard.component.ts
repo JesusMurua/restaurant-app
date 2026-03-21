@@ -9,6 +9,12 @@ interface TopProduct {
   count: number;
 }
 
+interface CancellationGroup {
+  reason: string;
+  count: number;
+  totalCents: number;
+}
+
 interface DashboardData {
   totalCents: number;
   orderCount: number;
@@ -18,6 +24,10 @@ interface DashboardData {
   cardCents: number;
   topProducts: TopProduct[];
   orders: Order[];
+  cancelledCount: number;
+  cancelledTotalCents: number;
+  cancellationGroups: CancellationGroup[];
+  cancelledOrders: Order[];
 }
 
 @Component({
@@ -38,26 +48,31 @@ export class DashboardComponent implements OnInit {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const orders = await this.db.orders
+    const allOrders = await this.db.orders
       .where('createdAt')
       .aboveOrEqual(todayStart)
       .toArray();
 
-    const totalCents = orders.reduce((s, o) => s + o.totalCents, 0);
-    const orderCount = orders.length;
+    // Separate completed from cancelled
+    const completedOrders = allOrders.filter(o => o.cancellationStatus !== 'cancelled');
+    const cancelledOrders = allOrders.filter(o => o.cancellationStatus === 'cancelled');
+
+    // KPI metrics — only completed orders
+    const totalCents = completedOrders.reduce((s, o) => s + o.totalCents, 0);
+    const orderCount = completedOrders.length;
     const averageTicketCents = orderCount > 0 ? Math.round(totalCents / orderCount) : 0;
 
-    const cashOrders = orders.filter(o => o.paymentMethod === 'cash');
-    const cardOrders = orders.filter(o => o.paymentMethod === 'card');
+    const cashOrders = completedOrders.filter(o => o.paymentMethod === 'cash');
+    const cardOrders = completedOrders.filter(o => o.paymentMethod === 'card');
     const cashCents = cashOrders.reduce((s, o) => s + o.totalCents, 0);
     const cardCents = cardOrders.reduce((s, o) => s + o.totalCents, 0);
     const topMethod: PaymentMethod | null = orderCount === 0
       ? null
       : cashOrders.length >= cardOrders.length ? 'cash' : 'card';
 
-    // Count product appearances across all orders
+    // Top 5 products — only completed orders
     const productCounts = new Map<string, number>();
-    for (const order of orders) {
+    for (const order of completedOrders) {
       for (const item of order.items) {
         const key = item.product.name;
         productCounts.set(key, (productCounts.get(key) ?? 0) + item.quantity);
@@ -69,6 +84,21 @@ export class DashboardComponent implements OnInit {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
+    // Cancellation groups
+    const cancelledTotalCents = cancelledOrders.reduce((s, o) => s + o.totalCents, 0);
+    const reasonMap = new Map<string, { count: number; totalCents: number }>();
+    for (const order of cancelledOrders) {
+      const reason = order.cancellationReason ?? 'Sin motivo';
+      const existing = reasonMap.get(reason) ?? { count: 0, totalCents: 0 };
+      existing.count += 1;
+      existing.totalCents += order.totalCents;
+      reasonMap.set(reason, existing);
+    }
+
+    const cancellationGroups: CancellationGroup[] = [...reasonMap.entries()]
+      .map(([reason, { count, totalCents: cents }]) => ({ reason, count, totalCents: cents }))
+      .sort((a, b) => b.totalCents - a.totalCents);
+
     this.data.set({
       totalCents,
       orderCount,
@@ -77,12 +107,27 @@ export class DashboardComponent implements OnInit {
       cashCents,
       cardCents,
       topProducts,
-      orders: [...orders].sort((a, b) =>
+      orders: [...allOrders].sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      ),
+      cancelledCount: cancelledOrders.length,
+      cancelledTotalCents,
+      cancellationGroups,
+      cancelledOrders: [...cancelledOrders].sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       ),
     });
 
     this.isLoading.set(false);
+  }
+
+  /** Returns the display status label for an order */
+  getStatusLabel(order: Order): string {
+    if (order.cancellationStatus === 'cancelled') return 'Cancelada';
+    if (order.deliveryStatus === 'delivered') return 'Entregada';
+    if (order.kitchenStatus === 'done') return 'Lista';
+    if (order.kitchenStatus === 'new') return 'En cocina';
+    return 'Nueva';
   }
 
   /** Formats a Date to HH:MM */

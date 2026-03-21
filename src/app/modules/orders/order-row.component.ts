@@ -27,6 +27,7 @@ export class OrderRowComponent {
   //#region Outputs
   @Output() markDelivered = new EventEmitter<string>();
   @Output() cancelOrder = new EventEmitter<string>();
+  @Output() viewTicket = new EventEmitter<Order>();
   //#endregion
 
   //#region State
@@ -35,16 +36,34 @@ export class OrderRowComponent {
 
   //#region Computed
 
+  /** Whether this order is finalized (cancelled or delivered) — timer stops */
+  get isFinalized(): boolean {
+    return this.isCancelled || this.isDelivered;
+  }
+
+  /**
+   * Elapsed seconds since order creation.
+   * For cancelled orders: freezes at cancelledAt.
+   * For delivered orders: uses current time (no deliveredAt field yet).
+   */
+  private get elapsedSeconds(): number {
+    const created = new Date(this.order.createdAt).getTime();
+    const end = (this.isCancelled && this.order.cancelledAt)
+      ? new Date(this.order.cancelledAt).getTime()
+      : this.now.getTime();
+    return Math.max(0, Math.floor((end - created) / 1000));
+  }
+
   /** Formatted elapsed time as "M:SS" */
   get elapsedFormatted(): string {
-    const sec = Math.max(0, Math.floor((this.now.getTime() - new Date(this.order.createdAt).getTime()) / 1000));
+    const sec = this.elapsedSeconds;
     const min = Math.floor(sec / 60);
     const s = sec % 60;
     return `${min}:${s.toString().padStart(2, '0')}`;
   }
 
   get isOverdue(): boolean {
-    return Math.floor((this.now.getTime() - new Date(this.order.createdAt).getTime()) / 1000) >= 600;
+    return this.elapsedSeconds >= 600;
   }
 
   //#endregion
@@ -61,6 +80,10 @@ export class OrderRowComponent {
 
   onCancel(): void {
     this.cancelOrder.emit(this.order.id);
+  }
+
+  onViewTicket(): void {
+    this.viewTicket.emit(this.order);
   }
 
   /** Generates a kitchen comanda (no prices) and triggers window.print() */

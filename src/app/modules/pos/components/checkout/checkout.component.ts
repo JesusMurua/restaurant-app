@@ -192,14 +192,28 @@ export class CheckoutComponent implements OnInit {
 
   //#region Ticket
 
-  /** Opens the saved ticket text in a browser print dialog as fallback */
+  /** Opens a styled ticket preview in a new window and triggers print */
   viewTicket(): void {
     const order = this.completedOrder();
-    if (!order?.ticketText) return;
+    if (!order) return;
 
+    const html = this.printService.getTicketHtml(order);
     const win = window.open('', '_blank');
     if (!win) return;
-    win.document.write(`<pre style="font-family:monospace;font-size:14px;padding:16px">${order.ticketText}</pre>`);
+    win.document.write(`
+      <html>
+        <head>
+          <title>Ticket #${order.orderNumber}</title>
+          <style>
+            body { margin: 0; padding: 0; background: white; }
+            @media print {
+              @page { size: 80mm auto; margin: 2mm; }
+            }
+          </style>
+        </head>
+        <body>${html}</body>
+      </html>
+    `);
     win.document.close();
     win.print();
   }

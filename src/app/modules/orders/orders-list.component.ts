@@ -9,6 +9,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { Order } from '../../core/models';
 import { AuthService } from '../../core/services/auth.service';
 import { OrdersService, getDisplayStatus } from '../../core/services/orders.service';
+import { PrintService } from '../../core/services/print.service';
 import { OrderRowComponent } from './order-row.component';
 
 /** Filter tabs for the order list */
@@ -36,6 +37,11 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   readonly cancellingOrder = signal<Order | null>(null);
   readonly selectedReason = signal('');
   readonly cancelNotes = signal('');
+
+  /** Ticket preview dialog state */
+  readonly showTicketDialog = signal(false);
+  readonly ticketHtmlContent = signal('');
+  readonly ticketOrder = signal<Order | null>(null);
 
   readonly cancellationReasons = [
     'Error en la orden',
@@ -81,6 +87,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   constructor(
     private readonly ordersService: OrdersService,
     private readonly authService: AuthService,
+    private readonly printService: PrintService,
     private readonly router: Router,
   ) {
     const role = this.authService.currentUser()?.role;
@@ -118,6 +125,38 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/pos']);
+  }
+
+  /** Opens the ticket preview dialog for an order */
+  onViewTicket(order: Order): void {
+    this.ticketHtmlContent.set(this.printService.getTicketHtml(order));
+    this.ticketOrder.set(order);
+    this.showTicketDialog.set(true);
+  }
+
+  /** Opens a new window with the ticket HTML and triggers print */
+  onPrintTicket(): void {
+    const html = this.ticketHtmlContent();
+    if (!html) return;
+
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`
+      <html>
+        <head>
+          <title>Ticket</title>
+          <style>
+            body { margin: 0; padding: 0; background: white; }
+            @media print {
+              @page { size: 80mm auto; margin: 2mm; }
+            }
+          </style>
+        </head>
+        <body>${html}</body>
+      </html>
+    `);
+    win.document.close();
+    win.print();
   }
 
   /** Opens the cancellation dialog for a specific order */

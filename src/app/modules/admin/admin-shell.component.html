@@ -36,9 +36,13 @@
       </a>
     </nav>
 
-    <button type="button" class="admin-header__back" (click)="logout()" aria-label="Volver al POS">
+    <button type="button" class="admin-header__back" (click)="goToPos()" aria-label="Ir al POS">
       <i class="pi pi-arrow-left"></i>
-      <span>Volver al POS</span>
+      <span>Ir al POS</span>
+    </button>
+    <button type="button" class="admin-header__logout" (click)="logout()" aria-label="Cerrar sesión">
+      <i class="pi pi-sign-out"></i>
+      <span>Cerrar sesión</span>
     </button>
   </header>
 

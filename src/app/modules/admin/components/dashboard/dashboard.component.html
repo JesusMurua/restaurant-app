@@ -47,6 +47,7 @@
     <!-- Corte de caja -->
     <section class="section-card">
       <h2 class="section-card__title">Corte de caja</h2>
+      <p class="section-card__subtitle">Solo órdenes completadas</p>
       <div class="cutoff-grid">
         <div class="cutoff-row">
           <span class="badge badge--cash">Efectivo</span>
@@ -62,6 +63,47 @@
         </div>
       </div>
     </section>
+
+    <!-- Cancelaciones del día -->
+    @if (d.cancelledCount > 0) {
+      <section class="section-card">
+        <h2 class="section-card__title section-card__title--danger">Cancelaciones del día</h2>
+
+        <!-- Detail table of cancelled orders -->
+        <div class="orders-table-wrap">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Productos</th>
+                <th>Motivo</th>
+                <th>Hora</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of d.cancelledOrders; track order.id) {
+                <tr>
+                  <td class="orders-table__num">#{{ order.orderNumber }}</td>
+                  <td class="orders-table__items">{{ order.items.length }} artículo(s)</td>
+                  <td class="orders-table__cancel-reason-cell">{{ order.cancellationReason ?? 'Sin motivo' }}</td>
+                  <td class="orders-table__time">{{ formatTime(order.createdAt) }}</td>
+                  <td class="orders-table__total">{{ order.totalCents | price }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="orders-table__total-row">
+                <td colspan="4"><strong>Total cancelado</strong> · {{ d.cancelledCount }} {{ d.cancelledCount === 1 ? 'orden' : 'órdenes' }}</td>
+                <td class="orders-table__total orders-table__total--danger">{{ d.cancelledTotalCents | price }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <p class="section-card__note">No afectan el corte de caja</p>
+      </section>
+    }
 
     <div class="dashboard__columns">
 
@@ -96,13 +138,14 @@
                   <th>#</th>
                   <th>Productos</th>
                   <th>Método</th>
+                  <th>Estado</th>
                   <th>Hora</th>
                   <th>Total</th>
                 </tr>
               </thead>
               <tbody>
                 @for (order of d.orders; track order.id) {
-                  <tr>
+                  <tr [class.orders-table__row--cancelled]="order.cancellationStatus === 'cancelled'">
                     <td class="orders-table__num">#{{ order.orderNumber }}</td>
                     <td class="orders-table__items">{{ order.items.length }} artículo(s)</td>
                     <td>
@@ -110,6 +153,22 @@
                         <span class="badge badge--cash">Efectivo</span>
                       } @else {
                         <span class="badge badge--card">Tarjeta</span>
+                      }
+                    </td>
+                    <td>
+                      @if (order.cancellationStatus === 'cancelled') {
+                        <span class="badge badge--cancelled">Cancelada</span>
+                        @if (order.cancellationReason) {
+                          <span class="orders-table__cancel-reason">{{ order.cancellationReason }}</span>
+                        }
+                      } @else if (getStatusLabel(order) === 'Nueva') {
+                        <span class="badge badge--new">Nueva</span>
+                      } @else if (getStatusLabel(order) === 'En cocina') {
+                        <span class="badge badge--cooking">En cocina</span>
+                      } @else if (getStatusLabel(order) === 'Lista') {
+                        <span class="badge badge--ready">Lista</span>
+                      } @else if (getStatusLabel(order) === 'Entregada') {
+                        <span class="badge badge--delivered">Entregada</span>
                       }
                     </td>
                     <td class="orders-table__time">{{ formatTime(order.createdAt) }}</td>

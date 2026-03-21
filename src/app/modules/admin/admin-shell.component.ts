@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
 
@@ -14,7 +14,13 @@ export class AdminShellComponent {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly router: Router,
   ) {}
+
+  /** Navigates to the POS without logging out */
+  goToPos(): void {
+    this.router.navigate(['/pos']);
+  }
 
   /** Logs out and returns to the PIN screen */
   logout(): void {

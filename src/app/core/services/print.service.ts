@@ -61,6 +61,74 @@ export class PrintService {
     }
   }
 
+  /**
+   * Generates a styled HTML ticket for preview and printing.
+   * Designed for 80mm thermal printer width (280px).
+   * @param order The order to generate the ticket for
+   * @returns Complete HTML string with inline styles
+   */
+  getTicketHtml(order: Order): string {
+    const date = new Date(order.createdAt).toLocaleString('es-MX', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const sep = '<div style="text-align:center;color:#9CA3AF;letter-spacing:-1px">─────────────────────</div>';
+
+    const itemRows = order.items.map(item => {
+      const sizeLabel = item.size ? ` (${item.size.label})` : '';
+      const extras = item.extras.length > 0 ? item.extras.map(e => e.label).join(', ') : '';
+      const price = `$${(item.totalPriceCents / 100).toFixed(2)}`;
+      return `
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0">
+          <span>${item.quantity}x ${item.product.name}${sizeLabel}</span>
+          <span style="white-space:nowrap;margin-left:8px">${price}</span>
+        </div>
+        ${extras ? `<div style="font-size:11px;color:#6B7280;padding-left:20px">+ ${extras}</div>` : ''}
+        ${item.notes ? `<div style="font-size:11px;color:#92400E;padding-left:20px">⚠ ${item.notes}</div>` : ''}
+      `;
+    }).join('');
+
+    const total = `$${(order.totalCents / 100).toFixed(2)}`;
+    const methodLabel = order.paymentMethod === 'cash' ? 'Efectivo' : 'Tarjeta';
+
+    let changeHtml = '';
+    if (order.paymentMethod === 'cash' && order.tenderedCents != null) {
+      const tendered = `$${(order.tenderedCents / 100).toFixed(2)}`;
+      const change = `$${((order.tenderedCents - order.totalCents) / 100).toFixed(2)}`;
+      changeHtml = `
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#374151">
+          <span>Pago</span><span>${tendered}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#374151">
+          <span>Cambio</span><span>${change}</span>
+        </div>
+      `;
+    }
+
+    return `
+      <div style="width:280px;margin:0 auto;padding:16px;font-family:'Courier New',Courier,monospace;background:white;color:#111827">
+        <div style="text-align:center;font-size:16px;font-weight:700;margin-bottom:4px">MI NEGOCIO</div>
+        ${sep}
+        <div style="font-size:12px;color:#6B7280;text-align:center">${date}</div>
+        <div style="font-size:12px;color:#6B7280;text-align:center;margin-bottom:4px">Orden #${order.orderNumber}</div>
+        ${sep}
+        ${itemRows}
+        ${sep}
+        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;padding:4px 0">
+          <span>TOTAL</span><span>${total}</span>
+        </div>
+        <div style="font-size:12px;color:#6B7280">Pago: ${methodLabel}</div>
+        ${changeHtml}
+        ${sep}
+        <div style="text-align:center;font-size:12px;color:#6B7280;margin-top:4px">¡Gracias por su visita!</div>
+      </div>
+    `;
+  }
+
   //#endregion
 
   //#region Private Helpers

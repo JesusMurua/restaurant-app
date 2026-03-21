@@ -148,6 +148,20 @@
 }
 
 // -----------------------------------------------------------------------
+// p-dialog close button — override global green accent
+// -----------------------------------------------------------------------
+:host ::ng-deep .p-dialog-header-close {
+  background: transparent !important;
+  border: none !important;
+  color: #6B7280 !important;
+
+  &:hover {
+    background: #F3F4F6 !important;
+    color: #374151 !important;
+  }
+}
+
+// -----------------------------------------------------------------------
 // Cancel Dialog
 // -----------------------------------------------------------------------
 .cancel-dialog {
@@ -218,6 +232,14 @@
       color: white;
       &:hover { background: #B91C1C; }
       &:disabled { background: #D1D5DB; cursor: not-allowed; }
+    }
+
+    &--print {
+      background: #16A34A;
+      color: white;
+      gap: $space-2;
+      i { font-size: 14px; }
+      &:hover { background: #15803D; }
     }
   }
 }

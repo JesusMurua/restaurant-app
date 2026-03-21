@@ -48,6 +48,7 @@
         [isCancelled]="order.cancellationStatus === 'cancelled'"
         (markDelivered)="onMarkDelivered($event)"
         (cancelOrder)="openCancelDialog(order)"
+        (viewTicket)="onViewTicket($event)"
       />
     } @empty {
       <div class="orders-empty">
@@ -114,6 +115,38 @@
         (click)="confirmCancel()"
       >
         Cancelar orden
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Ticket Preview Dialog -->
+<p-dialog
+  [header]="'Ticket #' + ticketOrder()?.orderNumber"
+  [(visible)]="showTicketDialog"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '360px' }"
+  [draggable]="false"
+>
+  <div [innerHTML]="ticketHtmlContent()"></div>
+
+  <ng-template pTemplate="footer">
+    <div class="cancel-dialog__footer">
+      <button
+        type="button"
+        class="cancel-dialog__btn cancel-dialog__btn--secondary"
+        (click)="showTicketDialog.set(false)"
+      >
+        Cerrar
+      </button>
+      <button
+        type="button"
+        class="cancel-dialog__btn cancel-dialog__btn--print"
+        (click)="onPrintTicket()"
+      >
+        <i class="pi pi-print"></i>
+        Imprimir
       </button>
     </div>
   </ng-template>

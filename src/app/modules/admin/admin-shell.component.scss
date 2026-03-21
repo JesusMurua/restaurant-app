@@ -70,6 +70,28 @@
     &:hover { background: #F3F4F6; }
     &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
   }
+
+  &__logout {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    padding: $space-2 $space-3;
+    min-height: 44px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #6B7280;
+    font-size: $font-size-label;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+
+    i { font-size: 14px; }
+
+    &:hover { background: #F3F4F6; }
+    &:focus-visible { outline: 2px solid $color-primary; outline-offset: 2px; }
+  }
 }
 
 // -----------------------------------------------------------------------

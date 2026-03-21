@@ -58,6 +58,10 @@
           <i class="pi pi-print"></i>
           <span>Imprimir comanda</span>
         </button>
+        <button type="button" class="order-row__action order-row__action--print" (click)="onViewTicket()">
+          <i class="pi pi-receipt"></i>
+          <span>Ver ticket</span>
+        </button>
         @if (canDeliver && !isDelivered && !isCancelled) {
           <button type="button" class="order-row__action order-row__action--deliver" (click)="onDeliver()">
             <i class="pi pi-check"></i>
