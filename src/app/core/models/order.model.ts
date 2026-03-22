@@ -61,4 +61,12 @@ export interface Order {
   cancellationReason?: string;
   /** Timestamp when the order was cancelled */
   cancelledAt?: Date;
+  /** Discount amount in cents applied to this order */
+  discountCents?: number;
+  /** Sum of item prices before discount, in cents */
+  subtotalCents?: number;
+  /** Display label for the applied discount (e.g. "10% Empleados") */
+  discountLabel?: string;
+  /** Free-text reason for applying the discount */
+  discountReason?: string;
 }

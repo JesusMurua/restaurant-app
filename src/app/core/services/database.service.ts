@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import Dexie, { Table } from 'dexie';
 
-import { AppConfig, Category, CartItem, Order, Product } from '../models';
+import { AppConfig, CashMovement, CashRegisterSession, Category, CartItem, DiscountPreset, Order, Product } from '../models';
 
 /**
  * IndexedDB wrapper using Dexie.js.
@@ -14,6 +14,8 @@ import { AppConfig, Category, CartItem, Order, Product } from '../models';
  *   v3 — added kitchenStatus index to orders (KDS)
  *   v4 — added deliveryStatus index to orders (order tracking)
  *   v5 — added cancellationStatus index to orders (order cancellation)
+ *   v6 — added discountPresets table
+ *   v7 — added cashSessions and cashMovements tables
  */
 @Injectable({ providedIn: 'root' })
 export class DatabaseService extends Dexie {
@@ -24,6 +26,9 @@ export class DatabaseService extends Dexie {
   cart!: Table<CartItem, string>;
   orders!: Table<Order, string>;
   config!: Table<AppConfig, string>;
+  discountPresets!: Table<DiscountPreset, number>;
+  cashSessions!: Table<CashRegisterSession, number>;
+  cashMovements!: Table<CashMovement, number>;
   //#endregion
 
   //#region Constructor
@@ -74,6 +79,26 @@ export class DatabaseService extends Dexie {
           order.cancellationStatus = 'none';
         }
       });
+    });
+
+    this.version(6).stores({
+      products:        'id, categoryId, isAvailable',
+      categories:      'id, sortOrder',
+      cart:            'id',
+      orders:          'id, syncStatus, createdAt, kitchenStatus, deliveryStatus, cancellationStatus',
+      config:          'id',
+      discountPresets: '++id, branchId, isActive',
+    });
+
+    this.version(7).stores({
+      products:        'id, categoryId, isAvailable',
+      categories:      'id, sortOrder',
+      cart:            'id',
+      orders:          'id, syncStatus, createdAt, kitchenStatus, deliveryStatus, cancellationStatus',
+      config:          'id',
+      discountPresets: '++id, branchId, isActive',
+      cashSessions:    '++id, branchId, status, openedAt',
+      cashMovements:   '++id, sessionId, createdAt',
     });
   }
   //#endregion

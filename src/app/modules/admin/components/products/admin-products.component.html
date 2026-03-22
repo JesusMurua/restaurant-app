@@ -187,6 +187,88 @@
 
     </p-tabPanel>
 
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 3 — Descuentos                                                  -->
+    <!-- ------------------------------------------------------------------ -->
+    <p-tabPanel header="Descuentos" leftIcon="pi pi-tag">
+
+      <div class="tab-toolbar">
+        <span></span>
+        <button type="button" class="btn-primary" (click)="openNewDiscountDialog()">
+          <i class="pi pi-plus"></i>
+          Nuevo descuento
+        </button>
+      </div>
+
+      <div class="products-table-wrap">
+        <p-table
+          [value]="discountPresets()"
+          [loading]="loadingDiscounts()"
+          [rowHover]="true"
+          dataKey="id"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="min-width: 14rem">Nombre</th>
+              <th style="min-width: 6rem">Tipo</th>
+              <th style="min-width: 8rem">Valor</th>
+              <th style="min-width: 6rem">Activo</th>
+              <th style="min-width: 7rem">Acciones</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-preset>
+            <tr>
+              <td class="products-table__name">{{ preset.name }}</td>
+              <td>
+                @if (preset.type === 'percent') {
+                  <span class="badge badge--percent">%</span>
+                } @else {
+                  <span class="badge badge--fixed">$</span>
+                }
+              </td>
+              <td class="products-table__price">
+                {{ preset.type === 'percent' ? preset.value + '%' : (preset.value | price) }}
+              </td>
+              <td>
+                <p-inputSwitch
+                  [ngModel]="preset.isActive"
+                  (onChange)="toggleDiscountActive(preset)"
+                />
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-icon"
+                  aria-label="Editar descuento"
+                  (click)="openEditDiscountDialog(preset)"
+                >
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn-icon btn-icon--danger"
+                  aria-label="Eliminar descuento"
+                  (click)="deleteDiscount(preset)"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5" class="products-table__empty">No hay descuentos registrados.</td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+      </div>
+
+    </p-tabPanel>
+
   </p-tabView>
 
 </div>
@@ -412,3 +494,96 @@
     <button type="button" class="btn-primary" (click)="saveCategory()">Guardar</button>
   </ng-template>
 </p-dialog>
+
+<!-- ====================================================================== -->
+<!-- Discount create / edit dialog                                           -->
+<!-- ====================================================================== -->
+<p-dialog
+  [header]="editingDiscount ? 'Editar descuento' : 'Nuevo descuento'"
+  [(visible)]="discountDialogVisible"
+  [modal]="true"
+  [closable]="true"
+  [style]="{ width: '420px' }"
+  [draggable]="false"
+>
+  <div class="product-form">
+
+    <div class="form-field">
+      <label class="form-field__label" for="df-name">Nombre</label>
+      <input
+        id="df-name"
+        type="text"
+        pInputText
+        [(ngModel)]="discountForm.name"
+        placeholder="Ej. Empleados, Amigos"
+        class="form-field__input"
+      />
+    </div>
+
+    <div class="form-field">
+      <label class="form-field__label">Tipo</label>
+      <div class="discount-type-row">
+        <p-radioButton
+          name="discountType"
+          value="percent"
+          [(ngModel)]="discountForm.type"
+          inputId="dt-percent"
+        />
+        <label for="dt-percent">% Porcentaje</label>
+        <p-radioButton
+          name="discountType"
+          value="fixed"
+          [(ngModel)]="discountForm.type"
+          inputId="dt-fixed"
+        />
+        <label for="dt-fixed">$ Monto fijo</label>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="form-field__label" for="df-value">Valor</label>
+      @if (discountForm.type === 'percent') {
+        <p-inputNumber
+          inputId="df-value"
+          [(ngModel)]="discountForm.value"
+          [min]="1"
+          [max]="100"
+          suffix="%"
+          styleClass="form-field__input"
+        />
+      } @else {
+        <p-inputNumber
+          inputId="df-value"
+          [ngModel]="discountForm.value"
+          (onInput)="onDiscountValueChange($event.value)"
+          [min]="0"
+          mode="currency"
+          currency="MXN"
+          locale="es-MX"
+          styleClass="form-field__input"
+        />
+      }
+    </div>
+
+    <div class="form-field form-field--row">
+      <label class="form-field__label" for="df-active">Activo</label>
+      <p-inputSwitch inputId="df-active" [(ngModel)]="discountForm.isActive" />
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button type="button" class="btn-ghost" (click)="discountDialogVisible = false">Cancelar</button>
+    <button
+      type="button"
+      class="btn-primary"
+      [disabled]="!discountForm.name.trim() || discountForm.value <= 0"
+      (click)="saveDiscount()"
+    >
+      Guardar
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- Confirm dialog for delete actions -->
+<p-confirmDialog />

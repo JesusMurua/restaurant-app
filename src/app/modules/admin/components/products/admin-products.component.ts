@@ -7,10 +7,14 @@ import { InputSwitchModule } from 'primeng/inputswitch';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { TabViewModule } from 'primeng/tabview';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { TooltipModule } from 'primeng/tooltip';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
-import { Category, Product } from '../../../../core/models';
+import { Category, DiscountPreset, Product } from '../../../../core/models';
 import { DatabaseService } from '../../../../core/services/database.service';
+import { DiscountService } from '../../../../core/services/discount.service';
 import { PricePipe } from '../../../../shared/pipes/price.pipe';
 
 /** Editable row for a product size inside the form */
@@ -42,6 +46,17 @@ interface CategoryForm {
   isActive: boolean;
 }
 
+/** Shape of the discount form used in the create/edit dialog */
+interface DiscountForm {
+  name: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  isActive: boolean;
+}
+
+/** Branch ID — hardcoded until multi-branch support */
+const BRANCH_ID = 1;
+
 @Component({
   selector: 'app-admin-products',
   standalone: true,
@@ -56,9 +71,12 @@ interface CategoryForm {
     TabViewModule,
     TooltipModule,
     PricePipe,
+    RadioButtonModule,
+    ConfirmDialogModule,
   ],
   templateUrl: './admin-products.component.html',
   styleUrl: './admin-products.component.scss',
+  providers: [ConfirmationService],
 })
 export class AdminProductsComponent implements OnInit {
 
@@ -79,6 +97,13 @@ export class AdminProductsComponent implements OnInit {
   catForm: CategoryForm = this.emptyCatForm();
   readonly catError = signal('');
 
+  // ---- Discount dialog ----
+  readonly discountPresets = signal<DiscountPreset[]>([]);
+  readonly loadingDiscounts = signal(false);
+  discountDialogVisible = false;
+  editingDiscount: DiscountPreset | null = null;
+  discountForm: DiscountForm = this.emptyDiscountForm();
+
   /** Available PrimeIcons for category selection */
   readonly iconOptions: { label: string; value: string }[] = [
     { label: 'Caja',     value: 'pi-box' },
@@ -98,13 +123,20 @@ export class AdminProductsComponent implements OnInit {
   //#endregion
 
   //#region Constructor
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly discountService: DiscountService,
+    private readonly confirmationService: ConfirmationService,
+  ) {}
   //#endregion
 
   //#region Lifecycle
 
   async ngOnInit(): Promise<void> {
-    await this.loadData();
+    await Promise.all([
+      this.loadData(),
+      this.loadDiscounts(),
+    ]);
   }
 
   //#endregion
@@ -278,6 +310,93 @@ export class AdminProductsComponent implements OnInit {
 
   //#endregion
 
+  //#region Discount Methods
+
+  /** Loads discount presets for current branch */
+  async loadDiscounts(): Promise<void> {
+    this.loadingDiscounts.set(true);
+    await this.discountService.loadPresets(BRANCH_ID);
+    const presets = await this.discountService.getPresets(BRANCH_ID);
+    this.discountPresets.set(presets);
+    this.loadingDiscounts.set(false);
+  }
+
+  /** Opens dialog to create new discount */
+  openNewDiscountDialog(): void {
+    this.editingDiscount = null;
+    this.discountForm = this.emptyDiscountForm();
+    this.discountDialogVisible = true;
+  }
+
+  /** Opens dialog to edit existing discount */
+  openEditDiscountDialog(preset: DiscountPreset): void {
+    this.editingDiscount = preset;
+    this.discountForm = {
+      name: preset.name,
+      type: preset.type,
+      value: preset.type === 'fixed' ? preset.value / 100 : preset.value,
+      isActive: preset.isActive,
+    };
+    this.discountDialogVisible = true;
+  }
+
+  /** Saves discount (create or update) */
+  async saveDiscount(): Promise<void> {
+    if (!this.discountForm.name.trim()) return;
+
+    const value = this.discountForm.type === 'fixed'
+      ? Math.round(this.discountForm.value * 100)
+      : this.discountForm.value;
+
+    if (this.editingDiscount) {
+      await this.discountService.updatePreset(this.editingDiscount.id, {
+        name: this.discountForm.name.trim(),
+        type: this.discountForm.type,
+        value,
+        isActive: this.discountForm.isActive,
+      });
+    } else {
+      await this.discountService.createPreset({
+        branchId: BRANCH_ID,
+        name: this.discountForm.name.trim(),
+        type: this.discountForm.type,
+        value,
+        isActive: this.discountForm.isActive,
+      });
+    }
+
+    this.discountDialogVisible = false;
+    await this.loadDiscounts();
+  }
+
+  /** Deletes a discount preset with confirmation */
+  deleteDiscount(preset: DiscountPreset): void {
+    this.confirmationService.confirm({
+      message: `¿Eliminar el descuento "${preset.name}"?`,
+      header: 'Confirmar eliminación',
+      icon: 'pi pi-trash',
+      acceptLabel: 'Eliminar',
+      rejectLabel: 'Cancelar',
+      accept: async () => {
+        await this.discountService.deletePreset(preset.id);
+        await this.loadDiscounts();
+      },
+    });
+  }
+
+  /** Toggles discount active state */
+  async toggleDiscountActive(preset: DiscountPreset): Promise<void> {
+    await this.discountService.updatePreset(preset.id, { isActive: !preset.isActive });
+    await this.loadDiscounts();
+  }
+
+  /** Handles value change for discount form (pesos → stored value) */
+  onDiscountValueChange(value: number | null): void {
+    this.discountForm.value = value ?? 0;
+  }
+
+  //#endregion
+
   //#region Helpers
 
   categoryName(id: number): string {
@@ -318,6 +437,10 @@ export class AdminProductsComponent implements OnInit {
 
   private emptyCatForm(): CategoryForm {
     return { name: '', icon: 'pi-tag', isActive: true };
+  }
+
+  private emptyDiscountForm(): DiscountForm {
+    return { name: '', type: 'percent', value: 0, isActive: true };
   }
 
   //#endregion

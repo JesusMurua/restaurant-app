@@ -83,10 +83,12 @@ export class PrintService {
       const extras = item.extras.length > 0 ? item.extras.map(e => e.label).join(', ') : '';
       const price = `$${(item.totalPriceCents / 100).toFixed(2)}`;
       return `
-        <div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0">
-          <span>${item.quantity}x ${item.product.name}${sizeLabel}</span>
-          <span style="white-space:nowrap;margin-left:8px">${price}</span>
-        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <tr>
+            <td style="padding:2px 0">${item.quantity}x ${item.product.name}${sizeLabel}</td>
+            <td style="padding:2px 0;text-align:right;white-space:nowrap">${price}</td>
+          </tr>
+        </table>
         ${extras ? `<div style="font-size:11px;color:#6B7280;padding-left:20px">+ ${extras}</div>` : ''}
         ${item.notes ? `<div style="font-size:11px;color:#92400E;padding-left:20px">⚠ ${item.notes}</div>` : ''}
       `;
@@ -100,12 +102,10 @@ export class PrintService {
       const tendered = `$${(order.tenderedCents / 100).toFixed(2)}`;
       const change = `$${((order.tenderedCents - order.totalCents) / 100).toFixed(2)}`;
       changeHtml = `
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:#374151">
-          <span>Pago</span><span>${tendered}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:#374151">
-          <span>Cambio</span><span>${change}</span>
-        </div>
+        <table style="width:100%;font-size:12px;color:#374151;border-collapse:collapse">
+          <tr><td style="padding:2px 0">Pago</td><td style="padding:2px 0;text-align:right">${tendered}</td></tr>
+          <tr><td style="padding:2px 0">Cambio</td><td style="padding:2px 0;text-align:right">${change}</td></tr>
+        </table>
       `;
     }
 
@@ -118,9 +118,25 @@ export class PrintService {
         ${sep}
         ${itemRows}
         ${sep}
-        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;padding:4px 0">
-          <span>TOTAL</span><span>${total}</span>
-        </div>
+        ${order.discountCents && order.subtotalCents ? `
+        <table style="width:100%;font-size:13px;border-collapse:collapse;color:#374151">
+          <tr>
+            <td style="padding:2px 0">Subtotal</td>
+            <td style="padding:2px 0;text-align:right">$${(order.subtotalCents / 100).toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td style="padding:2px 0">Descuento${order.discountLabel ? ' (' + order.discountLabel + ')' : ''}</td>
+            <td style="padding:2px 0;text-align:right">-$${(order.discountCents / 100).toFixed(2)}</td>
+          </tr>
+        </table>
+        ${sep}
+        ` : ''}
+        <table style="width:100%;border-collapse:collapse">
+          <tr>
+            <td style="font-size:15px;font-weight:700;padding:4px 0">TOTAL</td>
+            <td style="font-size:15px;font-weight:700;padding:4px 0;text-align:right">${total}</td>
+          </tr>
+        </table>
         <div style="font-size:12px;color:#6B7280">Pago: ${methodLabel}</div>
         ${changeHtml}
         ${sep}

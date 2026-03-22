@@ -29,6 +29,18 @@ export const adminRoutes: Routes = [
           import('./components/settings/admin-settings.component')
             .then(m => m.AdminSettingsComponent),
       },
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./components/reports/reports.component')
+            .then(m => m.ReportsComponent),
+      },
+      {
+        path: 'cash',
+        loadComponent: () =>
+          import('./components/cash-register/cash-register.component')
+            .then(m => m.CashRegisterComponent),
+      },
     ],
   },
 ];

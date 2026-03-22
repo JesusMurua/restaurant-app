@@ -124,8 +124,7 @@
 // -----------------------------------------------------------------------
 .checkout-total {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: $space-3 $space-4;
   background: white;
   border-radius: 12px;
@@ -142,6 +141,218 @@
     font-weight: 700;
     color: $color-text-title;
   }
+}
+
+// -----------------------------------------------------------------------
+// Price breakdown rows (subtotal, discount, total)
+// -----------------------------------------------------------------------
+.price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-1 0;
+
+  &__label {
+    font-size: $font-size-base;
+    color: $color-text-sub;
+  }
+
+  &__value {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text-title;
+  }
+
+  &--discount {
+    .price-row__label { color: $color-primary; }
+    .price-row__value { color: $color-primary; }
+  }
+
+  &--total {
+    padding-top: $space-2;
+  }
+}
+
+.checkout-total__divider {
+  height: 1px;
+  background: $color-border-soft;
+  margin: $space-2 0;
+}
+
+// -----------------------------------------------------------------------
+// Discount toggle + badge
+// -----------------------------------------------------------------------
+.discount-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.btn-discount-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  border: 1px dashed #D1D5DB;
+  border-radius: 8px;
+  background: transparent;
+  color: $color-text-sub;
+  font-size: $font-size-label;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+
+  i { font-size: 14px; }
+
+  &:hover {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+}
+
+.discount-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  background: $color-primary-light;
+  border: 1px solid $color-primary;
+  border-radius: 8px;
+  color: $color-primary;
+  font-size: $font-size-label;
+  font-weight: 600;
+
+  i { font-size: 12px; }
+
+  &__remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: rgba($color-primary, 0.15);
+    color: $color-primary;
+    cursor: pointer;
+    margin-left: $space-1;
+
+    i { font-size: 10px; }
+    &:hover { background: rgba($color-primary, 0.3); }
+  }
+}
+
+// -----------------------------------------------------------------------
+// Discount section (presets + custom)
+// -----------------------------------------------------------------------
+.discount-section {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding: $space-3 $space-4;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.discount-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+.discount-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-3;
+  min-height: 44px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  background: white;
+  color: $color-text-title;
+  font-size: $font-size-label;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  i { font-size: 12px; }
+
+  &__value {
+    font-weight: 700;
+    color: $color-primary;
+  }
+
+  &:hover {
+    border-color: #D1D5DB;
+    background: $color-bg-page;
+  }
+
+  &--active {
+    border-color: $color-primary;
+    background: $color-primary-light;
+
+    &:hover { background: $color-primary-light; }
+  }
+}
+
+.custom-discount {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+
+  &__type {
+    display: flex;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+
+.type-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: white;
+  color: $color-text-sub;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: $color-bg-page; }
+
+  &--active {
+    background: $color-primary;
+    color: white;
+
+    &:hover { background: $color-primary; }
+  }
+}
+
+:host ::ng-deep .custom-discount__input {
+  flex: 1;
+
+  .custom-discount__field,
+  .p-inputnumber-input {
+    width: 100%;
+    height: 64px;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: right;
+    border-radius: 10px;
+  }
+}
+
+.discount-reason {
+  width: 100%;
+  height: 44px;
+  font-size: $font-size-base;
+  border-radius: 8px;
 }
 
 .checkout-divider {

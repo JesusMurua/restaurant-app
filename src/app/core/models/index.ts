@@ -5,4 +5,7 @@ export * from './device-config.model';
 export * from './category.model';
 export * from './product.model';
 export * from './cart-item.model';
+export * from './cash-register.model';
+export * from './discount-preset.model';
 export * from './order.model';
+export * from './report.model';

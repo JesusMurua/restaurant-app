@@ -32,10 +32,139 @@
         </ul>
       </section>
 
-      <!-- Total -->
+      <!-- Discount toggle / badge -->
+      <div class="discount-toggle">
+        @if (discountCents() > 0) {
+          <div class="discount-badge">
+            <i class="pi pi-tag"></i>
+            <span>{{ discountLabel() }}</span>
+            <button type="button" class="discount-badge__remove" (click)="clearDiscount()" aria-label="Quitar descuento">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        } @else if (!showDiscountSection()) {
+          <button type="button" class="btn-discount-toggle" (click)="showDiscountSection.set(true)">
+            <i class="pi pi-tag"></i>
+            Aplicar descuento
+          </button>
+        }
+      </div>
+
+      <!-- Discount section -->
+      @if (showDiscountSection()) {
+        <section class="discount-section">
+
+          <!-- Preset chips -->
+          @if (presets().length > 0) {
+            <div class="discount-chips">
+              @for (preset of presets(); track preset.id) {
+                <button
+                  type="button"
+                  class="discount-chip"
+                  [class.discount-chip--active]="selectedPreset()?.id === preset.id"
+                  (click)="selectPreset(preset)"
+                >
+                  {{ preset.name }}
+                  <span class="discount-chip__value">
+                    {{ preset.type === 'percent' ? preset.value + '%' : (preset.value | price) }}
+                  </span>
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Custom discount button -->
+          <button
+            type="button"
+            class="discount-chip"
+            [class.discount-chip--active]="isCustomDiscount()"
+            (click)="enableCustomDiscount()"
+          >
+            <i class="pi pi-pencil"></i>
+            Personalizado
+          </button>
+
+          <!-- Custom discount inputs -->
+          @if (isCustomDiscount()) {
+            <div class="custom-discount">
+              <div class="custom-discount__type">
+                <button
+                  type="button"
+                  class="type-btn"
+                  [class.type-btn--active]="customDiscountType() === 'percent'"
+                  (click)="customDiscountType.set('percent')"
+                >
+                  %
+                </button>
+                <button
+                  type="button"
+                  class="type-btn"
+                  [class.type-btn--active]="customDiscountType() === 'fixed'"
+                  (click)="customDiscountType.set('fixed')"
+                >
+                  $
+                </button>
+              </div>
+
+              @if (customDiscountType() === 'percent') {
+                <p-inputNumber
+                  [ngModel]="customDiscountValue()"
+                  (onInput)="onCustomValueChange($event.value)"
+                  [min]="0"
+                  [max]="100"
+                  suffix="%"
+                  styleClass="custom-discount__input"
+                  inputStyleClass="custom-discount__field"
+                  placeholder="0%"
+                />
+              } @else {
+                <p-inputNumber
+                  [ngModel]="customDiscountValue()"
+                  (onInput)="onCustomValueChange($event.value)"
+                  [min]="0"
+                  mode="currency"
+                  currency="MXN"
+                  locale="es-MX"
+                  styleClass="custom-discount__input"
+                  inputStyleClass="custom-discount__field"
+                  placeholder="$0.00"
+                />
+              }
+            </div>
+          }
+
+          <!-- Discount reason -->
+          @if (discountCents() > 0 || isCustomDiscount() || selectedPreset()) {
+            <input
+              type="text"
+              pInputText
+              [ngModel]="discountReason()"
+              (ngModelChange)="discountReason.set($event)"
+              placeholder="Motivo (opcional)"
+              class="discount-reason"
+            />
+          }
+
+        </section>
+      }
+
+      <!-- Price breakdown -->
       <div class="checkout-total">
-        <span class="checkout-total__label">Total a cobrar</span>
-        <span class="checkout-total__amount">{{ totalCents() | price }}</span>
+        @if (discountCents() > 0) {
+          <div class="price-row">
+            <span class="price-row__label">Subtotal</span>
+            <span class="price-row__value">{{ subtotalCents() | price }}</span>
+          </div>
+          <div class="price-row price-row--discount">
+            <span class="price-row__label">Descuento</span>
+            <span class="price-row__value">-{{ discountCents() | price }}</span>
+          </div>
+          <div class="checkout-total__divider"></div>
+        }
+        <div class="price-row price-row--total">
+          <span class="checkout-total__label">Total a cobrar</span>
+          <span class="checkout-total__amount">{{ totalWithDiscount() | price }}</span>
+        </div>
       </div>
 
       <div class="checkout-divider"></div>
@@ -95,9 +224,9 @@
               @if (changeCents() > 0) {
                 <span class="checkout-cash__change-label">Cambio a entregar</span>
                 <span class="checkout-cash__change-amount">{{ changeCents() | price }}</span>
-              } @else if (tenderedCents() < totalCents()) {
+              } @else if (tenderedCents() < totalWithDiscount()) {
                 <span class="checkout-cash__change-label checkout-cash__change-label--error">
-                  Faltan {{ (totalCents() - tenderedCents()) | price }}
+                  Faltan {{ (totalWithDiscount() - tenderedCents()) | price }}
                 </span>
               }
             </div>
@@ -153,6 +282,16 @@
             <span class="confirmed-row__label">Orden</span>
             <span class="confirmed-row__value">#{{ order.orderNumber }}</span>
           </div>
+          @if (order.discountCents) {
+            <div class="confirmed-row">
+              <span class="confirmed-row__label">Subtotal</span>
+              <span class="confirmed-row__value">{{ order.subtotalCents | price }}</span>
+            </div>
+            <div class="confirmed-row">
+              <span class="confirmed-row__label">Descuento ({{ order.discountLabel }})</span>
+              <span class="confirmed-row__value" style="color:#16A34A">-{{ order.discountCents | price }}</span>
+            </div>
+          }
           <div class="confirmed-row">
             <span class="confirmed-row__label">Total</span>
             <span class="confirmed-row__value">{{ order.totalCents | price }}</span>

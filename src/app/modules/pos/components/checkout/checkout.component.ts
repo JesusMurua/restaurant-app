@@ -4,15 +4,21 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { RadioButtonModule } from 'primeng/radiobutton';
 
 import { PricePipe } from '../../../../shared/pipes/price.pipe';
-import { CartItem, Order, PaymentMethod } from '../../../../core/models';
+import { CartItem, DiscountPreset, Order, PaymentMethod } from '../../../../core/models';
 import { CartService } from '../../../../core/services/cart.service';
+import { DiscountService } from '../../../../core/services/discount.service';
 import { PrintService } from '../../../../core/services/print.service';
 import { SyncService } from '../../../../core/services/sync.service';
 
 /** Internal step of the checkout flow */
 type CheckoutStep = 'payment' | 'confirmed';
+
+/** Branch ID — hardcoded until multi-branch support */
+const BRANCH_ID = 1;
 
 @Component({
   selector: 'app-checkout',
@@ -22,6 +28,8 @@ type CheckoutStep = 'payment' | 'confirmed';
     FormsModule,
     ButtonModule,
     InputNumberModule,
+    InputTextModule,
+    RadioButtonModule,
     PricePipe,
   ],
   templateUrl: './checkout.component.html',
@@ -52,33 +60,93 @@ export class CheckoutComponent implements OnInit {
   /** Whether the printer fallback "Ver ticket" button should be shown */
   readonly showTicketFallback = !this.printService.hasThermalPrinter();
 
+  /** Timestamp of component init — used to debounce empty-cart redirect */
+  private readonly initTime = Date.now();
+
+  // ---- Discount state ----
+
+  /** Available discount presets from API/Dexie */
+  readonly presets = signal<DiscountPreset[]>([]);
+
+  /** Currently selected preset (null = none) */
+  readonly selectedPreset = signal<DiscountPreset | null>(null);
+
+  /** Whether custom discount mode is active */
+  readonly isCustomDiscount = signal(false);
+
+  /** Custom discount type when in custom mode */
+  readonly customDiscountType = signal<'percent' | 'fixed'>('percent');
+
+  /** Custom discount value (percent 0–100 or fixed amount in cents) */
+  readonly customDiscountValue = signal(0);
+
+  /** Optional reason for applying the discount */
+  readonly discountReason = signal('');
+
+  /** Whether the discount section is expanded */
+  readonly showDiscountSection = signal(false);
+
   // -----------------------------------------------------------------------
   // Derived state
   // -----------------------------------------------------------------------
 
+  /** Subtotal before discount — sum of all cart items */
+  readonly subtotalCents = computed(() => this.cartService.totalCents());
+
+  /** Discount amount in cents */
+  readonly discountCents = computed(() => {
+    const preset = this.selectedPreset();
+    if (preset) {
+      return this.discountService.calculateDiscount(preset, this.subtotalCents());
+    }
+    if (this.isCustomDiscount() && this.customDiscountValue() > 0) {
+      const fakePreset = {
+        type: this.customDiscountType(),
+        value: this.customDiscountType() === 'fixed'
+          ? Math.round(this.customDiscountValue() * 100)
+          : this.customDiscountValue(),
+      } as DiscountPreset;
+      return this.discountService.calculateDiscount(fakePreset, this.subtotalCents());
+    }
+    return 0;
+  });
+
+  /** Final total after discount */
+  readonly totalWithDiscount = computed(() =>
+    Math.max(0, this.subtotalCents() - this.discountCents()),
+  );
+
+  /** Display label for the applied discount */
+  readonly discountLabel = computed(() => {
+    const preset = this.selectedPreset();
+    if (preset) return preset.name;
+    if (this.isCustomDiscount() && this.customDiscountValue() > 0) {
+      return this.customDiscountType() === 'percent'
+        ? `${this.customDiscountValue()}% personalizado`
+        : 'Descuento monto fijo';
+    }
+    return '';
+  });
+
   /** Change to give back to the customer in cents (cash payments only) */
   readonly changeCents = computed(() => {
     if (this.selectedMethod() !== 'cash') return 0;
-    return Math.max(0, this.tenderedCents() - this.totalCents());
+    return Math.max(0, this.tenderedCents() - this.totalWithDiscount());
   });
 
   /**
    * True when the operator can confirm the payment:
-   *   - Total must be greater than zero (cart must have items)
+   *   - Total must be greater than zero
    *   - A method must be selected
-   *   - For cash: tendered amount must cover the total
-   *   - For card: no extra validation needed at this stage
+   *   - For cash: tendered amount must cover the total (after discount)
    */
   readonly canConfirm = computed(() => {
-    if (this.totalCents() === 0) return false;
+    if (this.totalWithDiscount() === 0) return false;
     const method = this.selectedMethod();
     if (!method) return false;
-    if (method === 'cash') return this.tenderedCents() >= this.totalCents();
-    return true; // card — terminal integration handled externally
+    if (method === 'cash') return this.tenderedCents() >= this.totalWithDiscount();
+    return true;
   });
-
-  /** Total from cart service (reactive signal) */
-  readonly totalCents = this.cartService.totalCents;
 
   /** Item count from cart service */
   readonly itemCount = this.cartService.itemCount;
@@ -90,23 +158,24 @@ export class CheckoutComponent implements OnInit {
     private readonly cartService: CartService,
     private readonly syncService: SyncService,
     private readonly printService: PrintService,
+    private readonly discountService: DiscountService,
     private readonly router: Router,
   ) {}
   //#endregion
 
   //#region Lifecycle
 
-  ngOnInit(): void {
-    // Subscribe to cart updates — also handles the empty-cart redirect.
-    // Using the subscription (instead of a synchronous check) ensures we wait
-    // for CartService.loadFromDb() to resolve before deciding to redirect.
+  async ngOnInit(): Promise<void> {
+    // Load discount presets
+    await this.discountService.loadPresets(BRANCH_ID);
+    const presets = await this.discountService.getPresets(BRANCH_ID);
+    this.presets.set(presets);
+
+    // Subscribe to cart updates — also handles the empty-cart redirect
     this.cartService.cart$.subscribe(items => {
       if (this.step() !== 'payment') return;
-
       this.cartItems = items;
-
-      // Redirect if cart is definitively empty (after DB load)
-      if (items.length === 0) {
+      if (items.length === 0 && (Date.now() - this.initTime) > 1000) {
         this.router.navigate(['/pos']);
       }
     });
@@ -133,48 +202,80 @@ export class CheckoutComponent implements OnInit {
 
   //#endregion
 
+  //#region Discount Methods
+
+  /** Selects a preset discount — toggles off if already selected */
+  selectPreset(preset: DiscountPreset): void {
+    if (this.selectedPreset()?.id === preset.id) {
+      this.selectedPreset.set(null);
+    } else {
+      this.selectedPreset.set(preset);
+      this.isCustomDiscount.set(false);
+      this.customDiscountValue.set(0);
+    }
+  }
+
+  /** Activates custom discount mode and clears preset */
+  enableCustomDiscount(): void {
+    this.isCustomDiscount.set(true);
+    this.selectedPreset.set(null);
+  }
+
+  /** Removes all discounts */
+  clearDiscount(): void {
+    this.selectedPreset.set(null);
+    this.isCustomDiscount.set(false);
+    this.customDiscountValue.set(0);
+    this.discountReason.set('');
+    this.showDiscountSection.set(false);
+  }
+
+  /** Called by the custom discount InputNumber */
+  onCustomValueChange(value: number | null): void {
+    if (this.customDiscountType() === 'fixed') {
+      this.customDiscountValue.set(value ?? 0);
+    } else {
+      this.customDiscountValue.set(value ?? 0);
+    }
+  }
+
+  //#endregion
+
   //#region Checkout Flow
 
   /**
    * Confirms the payment and completes the order.
    * Order: save to IndexedDB → print ticket → advance to confirmed step → clear cart.
-   *
-   * IMPORTANT: step is set to 'confirmed' BEFORE clearCart() so the cart$
-   * subscription guard (which checks step === 'payment') does not fire a
-   * redirect when the cart becomes empty after clearing.
    */
   async confirmPayment(): Promise<void> {
     if (!this.canConfirm()) return;
 
     const method = this.selectedMethod()!;
     const orderNumber = this.syncService.consumeOrderNumber();
+    const discount = this.discountCents();
 
     const order: Order = {
       id: crypto.randomUUID(),
       orderNumber,
       items: this.cartItems,
-      totalCents: this.totalCents(),
+      subtotalCents: this.subtotalCents(),
+      discountCents: discount > 0 ? discount : undefined,
+      discountLabel: this.discountLabel() || undefined,
+      discountReason: this.discountReason().trim() || undefined,
+      totalCents: this.totalWithDiscount(),
       paymentMethod: method,
       tenderedCents: method === 'cash' ? this.tenderedCents() : undefined,
       paymentProvider: null,
       createdAt: new Date(),
       syncStatus: 'pending',
-      businessId: 1,
+      businessId: BRANCH_ID,
     };
 
-    // 1. Save to IndexedDB — always first (offline-first)
     await this.syncService.saveOrder(order);
-
-    // 2. Print or save ticket text as fallback
     await this.printService.printTicket(order);
 
-    // 3. Advance to confirmation screen BEFORE clearing the cart.
-    //    This prevents the cart$ subscription from triggering a redirect
-    //    when cart becomes empty in the next step.
     this.completedOrder.set(order);
     this.step.set('confirmed');
-
-    // 4. Clear the cart (safe now — step is already 'confirmed')
     await this.cartService.clearCart();
   }
 

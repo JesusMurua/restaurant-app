@@ -290,3 +290,54 @@
     outline-offset: 2px;
   }
 }
+
+// -----------------------------------------------------------------------
+// Discount type badges
+// -----------------------------------------------------------------------
+.badge {
+  display: inline-block;
+  padding: 3px $space-2;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+
+  &--percent {
+    background: #EFF6FF;
+    color: #2563EB;
+  }
+
+  &--fixed {
+    background: $color-primary-light;
+    color: $color-primary;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Discount type radio row in dialog
+// -----------------------------------------------------------------------
+.discount-type-row {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+
+  label {
+    font-size: $font-size-base;
+    color: $color-text-title;
+    cursor: pointer;
+    margin-right: $space-3;
+  }
+}
+
+// -----------------------------------------------------------------------
+// Dialog close button — override global green accent
+// -----------------------------------------------------------------------
+:host ::ng-deep .p-dialog-header-close {
+  background: transparent !important;
+  border: none !important;
+  color: #6B7280 !important;
+
+  &:hover {
+    background: #F3F4F6 !important;
+    color: #374151 !important;
+  }
+}
